@@ -1,0 +1,6 @@
+[submodule "helpers"]
+	path = helpers
+	url = ../helpers.git
+[submodule "ArduinoDrivers"]
+	path = ArduinoDrivers
+	url = ../ArduinoDrivers.git
