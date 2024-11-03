@@ -11,6 +11,8 @@
 #include "helpers/crc16.hpp"
 #include "helpers/tmpLoop.hpp"
 
+#include <Adafruit_NeoPixel.h>
+
 #include <avr/eeprom.h>
 #include <avr/interrupt.h>
 #include <avr/io.h>
@@ -77,6 +79,11 @@ template <> class Buttons< 6> : public ButtonTimed<Button<SimplePinBitRead<6, da
 template <> class Buttons< 7> : public ButtonTimed<Button<SimplePinBitRead<7, dataIn, 0>, SimplePin::State::Zero>, shortPressCount, longPressCount> {/* intentionally empty */};
 
 
+int constexpr pinLedsStrip = 6;
+uint16_t constexpr ledsCount = 12;
+static Adafruit_NeoPixel ledsStrip(ledsCount, pinLedsStrip, NEO_GRBW + NEO_KHZ800);
+
+
 // Wrappers for loops.
 template<uint8_t Index>
 struct WrapperInitialize
@@ -137,6 +144,25 @@ struct WrapperLogButton
     }
 };
 
+template<uint8_t Index>
+struct WrapperLightFromButtons
+{
+    static void impl(Adafruit_NeoPixel & ledsStrip)
+    {
+        if (Buttons<Index>::isDownShort())
+        {
+            ledsStrip.setPixelColor(Index, Adafruit_NeoPixel::Color(150, 0, 0));
+        }
+        else if (Buttons<Index>::isDownLong())
+        {
+            ledsStrip.setPixelColor(Index, Adafruit_NeoPixel::Color(0, 150, 0));
+        }
+        else
+        {
+            ledsStrip.setPixelColor(Index, Adafruit_NeoPixel::Color(0, 0, 0));
+        }
+    }
+};
 
 
 enum class Mode
@@ -234,6 +260,11 @@ bool readWithCrc(void * const data, size_t const byteCount, Address const eeprom
 
 void setup()
 {
+    // initialize leds
+    ledsStrip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
+    ledsStrip.show();            // Turn OFF all pixels ASAP
+    // ledsStrip.setBrightness(Adafruit_NeoPixel::gamma8(255));
+
     Serial.begin(9600);
     Serial.println("Doll house v0.1");
 
@@ -274,20 +305,13 @@ void setup()
         {
             Helpers::TMP::Loop<8, WrapperLogButton>::impl();
 
-            // if (Buttons<0>::isDown())
-            // {
-            //     // light up LED red
-            // }
-            // else if (Buttons<0>::isDownLong())
-            // {
-            //     // light up LED green
-            // }
+            Helpers::TMP::Loop<8, WrapperLightFromButtons, Adafruit_NeoPixel &>::impl(ledsStrip);
 
             break;
         }
         }
 
-        // displayDataOut();
+        ledsStrip.show();
 
         delay(50); // idle for 50ms
     }
