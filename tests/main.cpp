@@ -23,16 +23,18 @@ typedef SimplePinBit<1, buttonsMemory> pin1;
 typedef Button<pin0, downState> button0;
 typedef Button<pin1, downState> button1;
 
-typedef ButtonTimed<button0, durationShort, durationLong> buttonTimed0;
-typedef ButtonTimed<button1, durationShort, durationLong> buttonTimed1;
-
 typedef ButtonTimedMultiple<button0, durationShort, durationLong, durationCombineMax> buttonTimedMultiple0;
 typedef ButtonTimedMultiple<button0, durationShort, durationLong, durationCombineMax> buttonTimedMultiple1;
 
 int main(int argc, char* argv[])
 {
+    // initialize
     static_assert(0 < sizeof(buttonsMemory));
     memset(buttonsMemory, 0, sizeof(buttonsMemory) / sizeof(buttonsMemory[0]));
+    pin0::initialize();
+    pin1::initialize();
+    buttonTimedMultiple0::initialize();
+    buttonTimedMultiple1::initialize();
 
     // button
     pin0::set(upState);
@@ -43,28 +45,6 @@ int main(int argc, char* argv[])
     assert(!button0::isUp());
     assert(button0::isDown());
 
-    // buttonTimed
-    pin0::set(upState);
-    buttonTimed0::update();
-
-    pin0::set(downState);
-    assert(!buttonTimed0::isDownShort());
-    for (size_t index = 0; index < durationShort; ++index)
-    {
-        buttonTimed0::update();
-    }
-    assert(!buttonTimed0::isUp());
-    assert(buttonTimed0::isDown());
-    assert(buttonTimed0::isDownShort());
-    assert(!buttonTimed0::isDownLong());
-    for (size_t index = 0; index < (durationLong - durationShort); ++index)
-    {
-        buttonTimed0::update();
-    }
-    assert(!buttonTimed0::isUp());
-    assert(buttonTimed0::isDown());
-    assert(!buttonTimed0::isDownShort());
-    assert(buttonTimed0::isDownLong());
 
     // buttonTimedMultiple
     buttonTimedMultiple0::clearHistory();
@@ -87,6 +67,12 @@ int main(int argc, char* argv[])
     assert(!buttonTimedMultiple0::isDownShort());
     assert(buttonTimedMultiple0::isDownLong());
 
+
+    // deinitialize
+    pin0::deinitialize();
+    pin1::deinitialize();
+    buttonTimedMultiple0::deinitialize();
+    buttonTimedMultiple1::deinitialize();
 
     std::cout << "The End." << std::endl;
 }
