@@ -100,6 +100,14 @@ int main(int argc, char* argv[])
         buttonTimedMultiple0::update();
     }
     assert(buttonTimedMultiple0::isDoubleDownShortFinished());
+    // forget with time
+    for (size_t index = 0; index < (durationCombineMax - durationShort); ++index)
+    {
+        buttonTimedMultiple0::update();
+    }
+    assert(buttonTimedMultiple0::isDoubleDownShortFinished());
+    buttonTimedMultiple0::update();
+    assert(!buttonTimedMultiple0::isDoubleDownShortFinished());
 
 
     // deinitialize
