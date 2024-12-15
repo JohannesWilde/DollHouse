@@ -67,6 +67,40 @@ int main(int argc, char* argv[])
     assert(!buttonTimedMultiple0::isDownShort());
     assert(buttonTimedMultiple0::isDownLong());
 
+    // double click
+    buttonTimedMultiple0::clearHistory();
+    assert(!buttonTimedMultiple0::isDoubleDownShortFinished());
+    pin0::set(upState);
+    for (size_t index = 0; index < durationLong; ++index)
+    {
+        buttonTimedMultiple0::update();
+    }
+    assert(!buttonTimedMultiple0::isDoubleDownShortFinished());
+    pin0::set(downState);
+    for (size_t index = 0; index < durationShort; ++index)
+    {
+        buttonTimedMultiple0::update();
+    }
+    assert(!buttonTimedMultiple0::isDoubleDownShortFinished());
+    pin0::set(upState);
+    for (size_t index = 0; index < durationCombineMax; ++index)
+    {
+        buttonTimedMultiple0::update();
+    }
+    assert(!buttonTimedMultiple0::isDoubleDownShortFinished());
+    pin0::set(downState);
+    for (size_t index = 0; index < durationShort; ++index)
+    {
+        buttonTimedMultiple0::update();
+    }
+    assert(!buttonTimedMultiple0::isDoubleDownShortFinished());
+    pin0::set(upState);
+    for (size_t index = 0; index < durationShort; ++index)
+    {
+        buttonTimedMultiple0::update();
+    }
+    assert(buttonTimedMultiple0::isDoubleDownShortFinished());
+
 
     // deinitialize
     pin0::deinitialize();
