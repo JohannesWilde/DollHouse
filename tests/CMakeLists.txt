@@ -9,11 +9,21 @@ add_subdirectory(../ArduinoDrivers ArduinoDrivers)
 add_subdirectory(../helpers helpers)
 
 
-add_executable(${PROJECT_NAME}
-    main.cpp
+add_executable(testButtonTimeMultiple
+    testButtonTimeMultiple.cpp
 )
 
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(testButtonTimeMultiple
+    PRIVATE arduinoDrivers
+    PRIVATE helpers
+)
+
+
+add_executable(testDollHouseStatemachine
+    testDollHouseStatemachine.cpp
+)
+
+target_link_libraries(testDollHouseStatemachine
     PRIVATE arduinoDrivers
     PRIVATE helpers
 )
