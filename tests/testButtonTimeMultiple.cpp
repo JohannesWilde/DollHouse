@@ -70,44 +70,84 @@ int main(int argc, char* argv[])
     // double click
     buttonTimedMultiple0::clearHistory();
     assert(!buttonTimedMultiple0::isDoubleDownShortFinished());
+    assert(!buttonTimedMultiple0::isSingleDownShortFinished());
     pin0::set(upState);
     for (size_t index = 0; index < durationLong; ++index)
     {
         buttonTimedMultiple0::update();
     }
     assert(!buttonTimedMultiple0::isDoubleDownShortFinished());
+    assert(!buttonTimedMultiple0::isSingleDownShortFinished());
     pin0::set(downState);
     for (size_t index = 0; index < durationShort; ++index)
     {
         buttonTimedMultiple0::update();
     }
     assert(!buttonTimedMultiple0::isDoubleDownShortFinished());
+    assert(!buttonTimedMultiple0::isSingleDownShortFinished());
     pin0::set(upState);
     for (size_t index = 0; index < durationCombineMax; ++index)
     {
         buttonTimedMultiple0::update();
     }
     assert(!buttonTimedMultiple0::isDoubleDownShortFinished());
+    assert(!buttonTimedMultiple0::isSingleDownShortFinished());
     pin0::set(downState);
     for (size_t index = 0; index < durationShort; ++index)
     {
         buttonTimedMultiple0::update();
     }
     assert(!buttonTimedMultiple0::isDoubleDownShortFinished());
+    assert(!buttonTimedMultiple0::isSingleDownShortFinished());
     pin0::set(upState);
+    for (size_t index = 0; index < durationCombineMax; ++index)
+    {
+        buttonTimedMultiple0::update();
+    }
+    assert(!buttonTimedMultiple0::isDoubleDownShortFinished());
+    assert(!buttonTimedMultiple0::isSingleDownShortFinished());
+    // double finished
+    buttonTimedMultiple0::update();
+    assert(buttonTimedMultiple0::isDoubleDownShortFinished());
+    assert(!buttonTimedMultiple0::isSingleDownShortFinished());
+    // forget with time
+    buttonTimedMultiple0::update();
+    assert(!buttonTimedMultiple0::isDoubleDownShortFinished());
+    assert(!buttonTimedMultiple0::isSingleDownShortFinished());
+
+    // single click
+    buttonTimedMultiple0::clearHistory();
+    assert(!buttonTimedMultiple0::isDoubleDownShortFinished());
+    assert(!buttonTimedMultiple0::isSingleDownShortFinished());
+    pin0::set(upState);
+    for (size_t index = 0; index < durationLong; ++index)
+    {
+        buttonTimedMultiple0::update();
+    }
+    assert(!buttonTimedMultiple0::isDoubleDownShortFinished());
+    assert(!buttonTimedMultiple0::isSingleDownShortFinished());
+    pin0::set(downState);
     for (size_t index = 0; index < durationShort; ++index)
     {
         buttonTimedMultiple0::update();
     }
-    assert(buttonTimedMultiple0::isDoubleDownShortFinished());
-    // forget with time
-    for (size_t index = 0; index < (durationCombineMax - durationShort); ++index)
+    assert(!buttonTimedMultiple0::isDoubleDownShortFinished());
+    assert(!buttonTimedMultiple0::isSingleDownShortFinished());
+    pin0::set(upState);
+    for (size_t index = 0; index < durationCombineMax; ++index)
     {
         buttonTimedMultiple0::update();
     }
-    assert(buttonTimedMultiple0::isDoubleDownShortFinished());
+    assert(!buttonTimedMultiple0::isDoubleDownShortFinished());
+    assert(!buttonTimedMultiple0::isSingleDownShortFinished());
+    // finished single
     buttonTimedMultiple0::update();
     assert(!buttonTimedMultiple0::isDoubleDownShortFinished());
+    assert(buttonTimedMultiple0::isSingleDownShortFinished());
+    // forget with time
+    buttonTimedMultiple0::update();
+    assert(!buttonTimedMultiple0::isDoubleDownShortFinished());
+    assert(!buttonTimedMultiple0::isSingleDownShortFinished());
 
 
     // deinitialize
