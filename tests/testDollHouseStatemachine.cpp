@@ -174,6 +174,26 @@ struct ColorCustom
     }
 };
 
+namespace SevenSegmentRgb
+{
+
+constexpr float nextMajorHue(float const hue)
+{
+    float nextMajorHue = (floor(hue * 7.f) + 1.f) / 7.f;
+    if (1.f <= nextMajorHue)
+    {
+        nextMajorHue -= 1.f;
+    }
+    return nextMajorHue;
+}
+
+constexpr float singleDeltaHue()
+{
+    return  1.f / (7.f * 256.f);
+}
+
+} // namespace SevenSegmentRgb
+
 struct DataType
 {
     ColorCustom & settingsColor;
@@ -347,12 +367,7 @@ Helpers::AbstractState<DataType> const & StateHue::process(DataType & data) cons
     if (buttonIsSingleDownShortFinished(data.buttonIndex))
     {
         // Change to next major hue.
-        float nextMajorHue = (floor(data.displayColor.hue * 7.) + 1.) / 7.;
-        if (1. <= nextMajorHue)
-        {
-            nextMajorHue -= 1.;
-        }
-        data.displayColor.hue = nextMajorHue;
+        data.displayColor.hue = SevenSegmentRgb::nextMajorHue(data.displayColor.hue);
 
         data.updateDisplay = true;
         // Reset timeout while the user still interacts with this state.
@@ -361,7 +376,7 @@ Helpers::AbstractState<DataType> const & StateHue::process(DataType & data) cons
     else if (buttonIsDownLong(data.buttonIndex))
     {
         // Change hue continuously.
-        float nextHue = data.displayColor.hue + 3. / (7 * 256.);
+        float nextHue = data.displayColor.hue + 3.f * SevenSegmentRgb::singleDeltaHue();
         if (1. <= nextHue)
         {
             nextHue -= 1.;
