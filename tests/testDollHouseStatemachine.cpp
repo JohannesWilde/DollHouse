@@ -3,11 +3,13 @@
 #include <ArduinoDrivers/buttonTimedMultiple.hpp>
 #include <ArduinoDrivers/simplePinBit.hpp>
 
+#include <colors/colorCustom.hpp>
+#include <colors/sevenSegmentRgb.hpp>
+
 #include <helpers/statemachine.hpp>
 #include <helpers/tmpLoop.hpp>
 
 #include <cassert>
-#include <cmath>
 #include <cstdint>
 #include <iostream>
 #include <string.h>
@@ -131,74 +133,11 @@ bool buttonIsDownLong(size_t const index)
 
 // Statemachine
 
-struct ColorCustom
-{
-    // All values are supposed to be in the range [0., 1.].
-    float hue;
-    float brightness;
-
-    // Hue -> RGB mapping
-    //    0       1/7      2/7      3/7      4/7      5/7      6/7      7/7
-    //    |--------|--------|--------|--------|--------|--------|--------|
-    //  R+B+G     R+B       B       G+B       G       R+G       R      R+B+G
-    //  white    violet   blue   turquoise  green   yellow     red     white
-
-
-    ColorCustom()
-        : hue(0.)
-        , brightness(0.)
-    {
-        // intentionally empty
-    }
-
-    ColorCustom(float const hueValue, float const brightnessValue)
-        : hue(hueValue)
-        , brightness(brightnessValue)
-    {
-        if (0. > brightness)
-        {
-            brightness = 0;
-        }
-        else if (1. < brightness)
-        {
-            brightness = 1.;
-        }
-        if (0. > hue)
-        {
-            hue = 0;
-        }
-        else if (1. < hue)
-        {
-            hue = 1.;
-        }
-    }
-};
-
-namespace SevenSegmentRgb
-{
-
-constexpr float nextMajorHue(float const hue)
-{
-    float nextMajorHue = (floor(hue * 7.f) + 1.f) / 7.f;
-    if (1.f <= nextMajorHue)
-    {
-        nextMajorHue -= 1.f;
-    }
-    return nextMajorHue;
-}
-
-constexpr float singleDeltaHue()
-{
-    return  1.f / (7.f * 256.f);
-}
-
-} // namespace SevenSegmentRgb
-
 struct DataType
 {
-    ColorCustom & settingsColor;
+    Colors::ColorCustom & settingsColor;
     bool & saveSettings;
-    ColorCustom & displayColor;
+    Colors::ColorCustom & displayColor;
     bool & updateDisplay;
     size_t const buttonIndex;
     bool incrementBrightness = false;
@@ -244,7 +183,7 @@ static StateHue const stateHue;
 
 void StateOff::init(DataType & data) const
 {
-    data.displayColor = ColorCustom(0., 0.);
+    data.displayColor = Colors::ColorCustom(0., 0.);
     data.updateDisplay = true;
 }
 
@@ -367,7 +306,7 @@ Helpers::AbstractState<DataType> const & StateHue::process(DataType & data) cons
     if (buttonIsSingleDownShortFinished(data.buttonIndex))
     {
         // Change to next major hue.
-        data.displayColor.hue = SevenSegmentRgb::nextMajorHue(data.displayColor.hue);
+        data.displayColor.hue = Colors::SevenSegmentRgb::nextMajorHue(data.displayColor.hue);
 
         data.updateDisplay = true;
         // Reset timeout while the user still interacts with this state.
@@ -376,7 +315,7 @@ Helpers::AbstractState<DataType> const & StateHue::process(DataType & data) cons
     else if (buttonIsDownLong(data.buttonIndex))
     {
         // Change hue continuously.
-        float nextHue = data.displayColor.hue + 3.f * SevenSegmentRgb::singleDeltaHue();
+        float nextHue = data.displayColor.hue + 3.f * Colors::SevenSegmentRgb::singleDeltaHue();
         if (1. <= nextHue)
         {
             nextHue -= 1.;
@@ -413,16 +352,16 @@ int main(int argc, char* argv[])
     Helpers::TMP::Loop<numberOfButtons, WrapperInitialize>::impl();
 
     // variables
-    static ColorCustom settingsColors[numberOfButtons] = {};
+    static Colors::ColorCustom settingsColors[numberOfButtons] = {};
     static bool saveSettings = false;
-    static ColorCustom displayColors[numberOfButtons] = {};
+    static Colors::ColorCustom displayColors[numberOfButtons] = {};
     static bool updateDisplay = true;
 
     // load settings from EEPROM
     // todo
     for (size_t index = 0; index < numberOfButtons; ++index)
     {
-        settingsColors[index] = ColorCustom(1.0, 1.0);
+        settingsColors[index] = Colors::ColorCustom(1.0, 1.0);
     }
 
     // statemachine
@@ -452,7 +391,7 @@ int main(int argc, char* argv[])
     if (updateDisplay)
     {
         // todo
-        // convert ColorCustom to RGB
+        // convert Colors::ColorCustom to RGB
         // show NEO-pixels
     }
 
