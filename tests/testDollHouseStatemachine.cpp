@@ -315,7 +315,7 @@ Helpers::AbstractState<DataType> const & StateHue::process(DataType & data) cons
     else if (buttonIsDownLong(data.buttonIndex))
     {
         // Change hue continuously.
-        float nextHue = data.displayColor.hue + 3.f * Colors::SevenSegmentRgb::singleDeltaHue();
+        float nextHue = data.displayColor.hue + 5.f * Colors::SevenSegmentRgb::singleDeltaHue();
         if (1. <= nextHue)
         {
             nextHue -= 1.;
