@@ -1,6 +1,6 @@
 #include "sevenSegmentRgb.hpp"
 
-#include <cmath>
+#include <math.h>
 
 
 namespace Colors

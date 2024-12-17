@@ -1,7 +1,7 @@
 #ifndef COLOR_RGBW_HPP
 #define COLOR_RGBW_HPP
 
-#include <cstdint>
+#include <stdint.h>
 
 namespace Colors
 {

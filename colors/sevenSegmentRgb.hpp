@@ -1,8 +1,8 @@
 #ifndef SEVEN_SEGMENT_RGB
 #define SEVEN_SEGMENT_RGB
 
-#include <colors/colorCustom.hpp>
-#include <colors/colorRgbw.hpp>
+#include "colorCustom.hpp"
+#include "colorRgbw.hpp"
 
 namespace Colors
 {
