@@ -25,6 +25,70 @@ float nextMajorHue(float const hue)
     return nextMajorHue;
 }
 
+Colors::ColorRgbw toRgb(Colors::ColorCustom const & color)
+{
+    ColorRgbw newColor;
+
+    float const scaledHue = color.hue * 7.;
+    uint8_t const hueBase = static_cast<int>(scaledHue);
+    uint8_t const integerDiff = (scaledHue - static_cast<float>(hueBase)) * 255;
+
+    switch (hueBase)
+    {
+    case 7:
+        // fall through
+    case 0:
+    {
+        newColor = ColorRgbw(255, 255, 255);
+        newColor.green -= integerDiff;
+        break;
+    }
+    case 1:
+    {
+        newColor = ColorRgbw(255, 0, 255);
+        newColor.red -= integerDiff;
+        break;
+    }
+    case 2:
+    {
+        newColor = ColorRgbw(0, 0, 255);
+        newColor.green = integerDiff;
+        break;
+    }
+    case 3:
+    {
+        newColor = ColorRgbw(0, 255, 255);
+        newColor.blue -= integerDiff;
+        break;
+    }
+    case 4:
+    {
+        newColor = ColorRgbw(0, 255, 0);
+        newColor.red = integerDiff;
+        break;
+    }
+    case 5:
+    {
+        newColor = ColorRgbw(255, 255, 0);
+        newColor.green -= integerDiff;
+        break;
+    }
+    case 6:
+    {
+        newColor = ColorRgbw(255, 0, 0);
+        newColor.blue = integerDiff;
+        newColor.green = integerDiff;
+        break;
+    }
+    default:
+    {
+        // intentionally empty
+    }
+    }
+
+    return newColor;
+}
+
 } // namespace SevenSegmentRgb
 
 } // namespace Colors
