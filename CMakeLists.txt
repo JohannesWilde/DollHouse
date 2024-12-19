@@ -13,6 +13,8 @@ add_subdirectory(helpers)
 add_library(dollHouseStatemachine
     dollHouseButtons.cpp
     dollHouseButtons.hpp
+    dollHouseStatemachine.cpp
+    dollHouseStatemachine.hpp
 )
 
 target_link_libraries(dollHouseStatemachine
