@@ -1,134 +1,16 @@
-
-#include <ArduinoDrivers/button.hpp>
-#include <ArduinoDrivers/buttonTimedMultiple.hpp>
-#include <ArduinoDrivers/simplePinBit.hpp>
-
 #include <colors/colorCustom.hpp>
 #include <colors/sevenSegmentRgb.hpp>
 
 #include <helpers/statemachine.hpp>
 #include <helpers/tmpLoop.hpp>
 
+#include <dollHouseButtons.hpp>
+
 #include <cassert>
 #include <cstdint>
 #include <iostream>
 #include <string.h>
 
-static constexpr SimplePin::State downState = SimplePin::State::Zero;
-static constexpr SimplePin::State upState = SimplePin::State::One;
-static constexpr ButtonTimedProperties::Duration_t durationShort = 2; // 50ms per cycle
-static constexpr ButtonTimedProperties::Duration_t durationLong = 8;
-static constexpr ButtonTimedProperties::Duration_t durationCombineMax = 6;
-static constexpr ButtonTimedProperties::Duration_t durationStateTimeout = 100;
-
-static uint8_t buttonsMemory[1];
-
-static size_t constexpr numberOfButtons = 2;
-
-typedef SimplePinBit<0, buttonsMemory> Pin0;
-typedef SimplePinBit<1, buttonsMemory> Pin1;
-
-typedef Button<Pin0, downState> Button0;
-typedef Button<Pin1, downState> Button1;
-
-typedef ButtonTimedMultiple<Button0, durationShort, durationLong, durationCombineMax> ButtonTimedMultiple0;
-typedef ButtonTimedMultiple<Button1, durationShort, durationLong, durationCombineMax> ButtonTimedMultiple1;
-
-template <uint8_t index>
-class Buttons;
-template <> class Buttons<0> : public ButtonTimedMultiple0 {/* intentionally empty */};
-template <> class Buttons<1> : public ButtonTimedMultiple1 {/* intentionally empty */};
-
-// Wrappers for loops.
-template<uint8_t Index>
-struct WrapperInitialize
-{
-    static void impl()
-    {
-        Buttons<Index>::initialize();
-    }
-};
-
-template<uint8_t Index>
-struct WrapperUpdate
-{
-    static void impl()
-    {
-        Buttons<Index>::update();
-    }
-};
-
-template<uint8_t Index>
-struct WrapperDeinitialize
-{
-    static void impl()
-    {
-        Buttons<Index>::deinitialize();
-    }
-};
-
-bool buttonIsDoubleDownShortFinished(size_t const index)
-{
-    // TMP -> runtime translator.
-    bool result = false;
-    switch (index)
-    {
-    case 0:
-    {
-        result = Buttons<0>::isDoubleDownShortFinished();
-        break;
-    }
-    case 1:
-    {
-        result = Buttons<1>::isDoubleDownShortFinished();
-        break;
-    }
-    }
-    static_assert(2 == numberOfButtons);
-    return result;
-}
-
-bool buttonIsSingleDownShortFinished(size_t const index)
-{
-    // TMP -> runtime translator.
-    bool result = false;
-    switch (index)
-    {
-    case 0:
-    {
-        result = Buttons<0>::isSingleDownShortFinished();
-        break;
-    }
-    case 1:
-    {
-        result = Buttons<1>::isSingleDownShortFinished();
-        break;
-    }
-    }
-    static_assert(2 == numberOfButtons);
-    return result;
-}
-
-bool buttonIsDownLong(size_t const index)
-{
-    // TMP -> runtime translator.
-    bool result = false;
-    switch (index)
-    {
-    case 0:
-    {
-        result = Buttons<0>::isDownLong();
-        break;
-    }
-    case 1:
-    {
-        result = Buttons<1>::isDownLong();
-        break;
-    }
-    }
-    static_assert(2 == numberOfButtons);
-    return result;
-}
 
 
 // Statemachine
@@ -190,7 +72,7 @@ void StateOff::init(DataType & data) const
 Helpers::AbstractState<DataType> const & StateOff::process(DataType & data) const
 {
     Helpers::AbstractState<DataType> const * nextState = this;
-    if (buttonIsSingleDownShortFinished(data.buttonIndex))
+    if (DollHouse::buttonIsSingleDownShortFinished(data.buttonIndex))
     {
         nextState = &stateOn;
     }
@@ -216,15 +98,15 @@ void StateOn::init(DataType & data) const
 Helpers::AbstractState<DataType> const & StateOn::process(DataType & data) const
 {
     Helpers::AbstractState<DataType> const * nextState = this;
-    if (buttonIsSingleDownShortFinished(data.buttonIndex))
+    if (DollHouse::buttonIsSingleDownShortFinished(data.buttonIndex))
     {
         nextState = &stateOff;
     }
-    else if (buttonIsDownLong(data.buttonIndex))
+    else if (DollHouse::buttonIsDownLong(data.buttonIndex))
     {
         nextState = &stateBrightness;
     }
-    else if (buttonIsDoubleDownShortFinished(data.buttonIndex))
+    else if (DollHouse::buttonIsDoubleDownShortFinished(data.buttonIndex))
     {
         nextState = &stateHue;
     }
@@ -250,7 +132,7 @@ void StateBrightness::init(DataType & data) const
 Helpers::AbstractState<DataType> const & StateBrightness::process(DataType & data) const
 {
     Helpers::AbstractState<DataType> const * nextState = this;
-    if (buttonIsDownLong(data.buttonIndex))
+    if (DollHouse::buttonIsDownLong(data.buttonIndex))
     {
         // As long as button stays down, modify brightness.
         static constexpr float brightnessStep = 1./256.;
@@ -297,22 +179,22 @@ void StateBrightness::deinit(DataType & data) const
 
 void StateHue::init(DataType & data) const
 {
-    data.stateTimeout = durationStateTimeout;
+    data.stateTimeout = DollHouse::durationStateTimeout;
 }
 
 Helpers::AbstractState<DataType> const & StateHue::process(DataType & data) const
 {
     Helpers::AbstractState<DataType> const * nextState = this;
-    if (buttonIsSingleDownShortFinished(data.buttonIndex))
+    if (DollHouse::buttonIsSingleDownShortFinished(data.buttonIndex))
     {
         // Change to next major hue.
         data.displayColor.hue = Colors::SevenSegmentRgb::nextMajorHue(data.displayColor.hue);
 
         data.updateDisplay = true;
         // Reset timeout while the user still interacts with this state.
-        data.stateTimeout = durationStateTimeout;
+        data.stateTimeout = DollHouse::durationStateTimeout;
     }
-    else if (buttonIsDownLong(data.buttonIndex))
+    else if (DollHouse::buttonIsDownLong(data.buttonIndex))
     {
         // Change hue continuously.
         float nextHue = data.displayColor.hue + 5.f * Colors::SevenSegmentRgb::singleDeltaHue();
@@ -324,9 +206,9 @@ Helpers::AbstractState<DataType> const & StateHue::process(DataType & data) cons
 
         data.updateDisplay = true;
         // Reset timeout while the user still interacts with this state.
-        data.stateTimeout = durationStateTimeout;
+        data.stateTimeout = DollHouse::durationStateTimeout;
     }
-    else if ((0 == data.stateTimeout) || buttonIsDoubleDownShortFinished(data.buttonIndex))
+    else if ((0 == data.stateTimeout) || DollHouse::buttonIsDoubleDownShortFinished(data.buttonIndex))
     {
         nextState = &stateOn;
     }
@@ -347,38 +229,38 @@ void StateHue::deinit(DataType & data) const
 int main(int argc, char* argv[])
 {
     // initialize
-    static_assert(0 < sizeof(buttonsMemory));
-    memset(buttonsMemory, 0, sizeof(buttonsMemory) / sizeof(buttonsMemory[0]));
-    Helpers::TMP::Loop<numberOfButtons, WrapperInitialize>::impl();
+    static_assert(0 < sizeof(DollHouse::buttonsMemory));
+    memset(DollHouse::buttonsMemory, 0, sizeof(DollHouse::buttonsMemory) / sizeof(DollHouse::buttonsMemory[0]));
+    Helpers::TMP::Loop<DollHouse::numberOfButtons, DollHouse::WrapperInitialize>::impl();
 
     // variables
-    static Colors::ColorCustom settingsColors[numberOfButtons] = {};
+    static Colors::ColorCustom settingsColors[DollHouse::numberOfButtons] = {};
     static bool saveSettings = false;
-    static Colors::ColorCustom displayColors[numberOfButtons] = {};
+    static Colors::ColorCustom displayColors[DollHouse::numberOfButtons] = {};
     static bool updateDisplay = true;
 
     // load settings from EEPROM
     // todo
-    for (size_t index = 0; index < numberOfButtons; ++index)
+    for (size_t index = 0; index < DollHouse::numberOfButtons; ++index)
     {
         settingsColors[index] = Colors::ColorCustom(1.0, 1.0);
     }
 
     // statemachine
-    DataType dataTypes[numberOfButtons] = {
+    DataType dataTypes[DollHouse::numberOfButtons] = {
         {settingsColors[0], saveSettings, displayColors[0], updateDisplay, 0, },
         {settingsColors[1], saveSettings, displayColors[1], updateDisplay, 1, },
     };
 
-    Helpers::Statemachine<DataType> statemachines[numberOfButtons] = {
+    Helpers::Statemachine<DataType> statemachines[DollHouse::numberOfButtons] = {
         Helpers::Statemachine(stateOff),
         Helpers::Statemachine(stateOff),
     };
 
     // loop
-    Helpers::TMP::Loop<numberOfButtons, WrapperUpdate>::impl();
+    Helpers::TMP::Loop<DollHouse::numberOfButtons, DollHouse::WrapperUpdate>::impl();
 
-    for (size_t index = 0; index < numberOfButtons; ++index)
+    for (size_t index = 0; index < DollHouse::numberOfButtons; ++index)
     {
         statemachines[index].process(dataTypes[index]);
     }
@@ -399,7 +281,7 @@ int main(int argc, char* argv[])
 
 
     // deinitialize
-    Helpers::TMP::Loop<numberOfButtons, WrapperDeinitialize>::impl();
+    Helpers::TMP::Loop<DollHouse::numberOfButtons, DollHouse::WrapperDeinitialize>::impl();
 
     std::cout << "The End." << std::endl;
 }

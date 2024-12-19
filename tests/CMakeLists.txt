@@ -1,14 +1,3 @@
-cmake_minimum_required(VERSION 3.19)
-
-project(DollHouseTests)
-
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
-
-add_subdirectory(../ArduinoDrivers ArduinoDrivers)
-add_subdirectory(../colors colors)
-add_subdirectory(../helpers helpers)
-
 
 add_executable(testButtonTimeMultiple
     testButtonTimeMultiple.cpp
@@ -25,7 +14,5 @@ add_executable(testDollHouseStatemachine
 )
 
 target_link_libraries(testDollHouseStatemachine
-    PRIVATE arduinoDrivers
-    PRIVATE customColors
-    PRIVATE helpers
+    PRIVATE dollHouseStatemachine
 )
