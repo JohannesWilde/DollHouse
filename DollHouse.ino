@@ -145,6 +145,9 @@ void setup()
         }
     }
 
+    // Show power-up on Status LED.
+    DollHouse::displayColors[0] = Colors::ColorCustomFixed(65536/7*4+500, 12);
+
     // statemachine
      DollHouse::DataType dataTypes[DollHouse::numberOfButtons] = {
         {1, 0, },
