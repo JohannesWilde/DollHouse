@@ -2,6 +2,12 @@
 
 #include <math.h>
 
+namespace // anonymous
+{
+
+static uint16_t constexpr huePeriodUint16 = 65535 / 7;
+
+} // namespace anonymous
 
 namespace Colors
 {
@@ -24,6 +30,12 @@ float nextMajorHue(float const hue)
     }
     return nextMajorHue;
 }
+
+uint16_t nextMajorHue(uint16_t const hue)
+{
+    return ((hue / huePeriodUint16) + 1) * huePeriodUint16;
+}
+
 
 Colors::ColorRgbw toRgb(Colors::ColorCustom const & color)
 {
@@ -96,10 +108,8 @@ Colors::ColorRgbw toRgb(Colors::ColorCustomFixed const & color)
 {
     ColorRgbw newColor;
 
-    uint16_t constexpr huePeriod = 65535 / 7;
-
-    uint16_t const hueBase = color.hue / huePeriod;
-    uint16_t const hueDiff = (color.hue - hueBase * huePeriod);
+    uint16_t const hueBase = color.hue / huePeriodUint16;
+    uint16_t const hueDiff = (color.hue - hueBase * huePeriodUint16);
     uint8_t const integerDiff = static_cast<uint8_t>(hueDiff * 7 / 257); // 255 * 7 / 65535 = 7 / 257
 
     switch (hueBase)

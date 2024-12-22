@@ -27,6 +27,9 @@ constexpr float singleDeltaHue()
 
 Colors::ColorRgbw toRgb(Colors::ColorCustom const & color);
 
+
+uint16_t nextMajorHue(uint16_t const hue);
+
 constexpr uint16_t singleDeltaHueUint16()
 {
     return 65535 / (7 * 256);
