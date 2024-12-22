@@ -84,6 +84,7 @@ Helpers::AbstractState<DataType> const & StateBrightness::process(DataType & dat
     {
         // As long as button stays down, modify brightness.
         static constexpr float brightnessStep = 1./256.;
+        static constexpr float brightnessMin = 2. * brightnessStep;
         if (data.incrementBrightness)
         {
             float const newBrightness = data.displayColor.brightness + brightnessStep;
@@ -99,9 +100,9 @@ Helpers::AbstractState<DataType> const & StateBrightness::process(DataType & dat
         else
         {
             float const newBrightness = data.displayColor.brightness - brightnessStep;
-            if (0. > newBrightness)
+            if (brightnessMin > newBrightness)
             {
-                data.displayColor.brightness = 0.;
+                data.displayColor.brightness = brightnessMin; // Prevent on and off state being indistinguishable.
             }
             else
             {
