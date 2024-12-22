@@ -83,8 +83,9 @@ Helpers::AbstractState<DataType> const & StateBrightness::process(DataType & dat
     if (DollHouse::buttonIsDownLong(data.buttonIndex))
     {
         // As long as button stays down, modify brightness.
-        static constexpr float brightnessStep = 1./256.;
-        static constexpr float brightnessMin = 2. * brightnessStep;
+        static constexpr float brightnessStepSingle = 1./256.;
+        static constexpr float brightnessStep = 2. * brightnessStepSingle;
+        static constexpr float brightnessMin = 2. * brightnessStepSingle;
         if (data.incrementBrightness)
         {
             float const newBrightness = data.displayColor.brightness + brightnessStep;
