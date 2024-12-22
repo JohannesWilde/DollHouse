@@ -1,13 +1,13 @@
 #ifndef DOLL_HOUSE_STATEMACHINE_HPP
 #define DOLL_HOUSE_STATEMACHINE_HPP
 
-#include <ArduinoDrivers/buttonTimed.hpp>
+#include "ArduinoDrivers/buttonTimed.hpp"
 
-#include <colors/colorCustom.hpp>
-#include <colors/sevenSegmentRgb.hpp>
+#include "colors/colorCustom.hpp"
+#include "colors/sevenSegmentRgb.hpp"
 
-#include <helpers/statemachine.hpp>
-#include <helpers/tmpLoop.hpp>
+#include "helpers/statemachine.hpp"
+#include "helpers/tmpLoop.hpp"
 
 
 namespace DollHouse
