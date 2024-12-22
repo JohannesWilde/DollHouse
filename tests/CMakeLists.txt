@@ -16,3 +16,12 @@ add_executable(testDollHouseStatemachine
 target_link_libraries(testDollHouseStatemachine
     PRIVATE dollHouseStatemachine
 )
+
+
+add_executable(testColorsCustom
+    testColorsCustom.cpp
+)
+
+target_link_libraries(testColorsCustom
+    PRIVATE customColors
+)

@@ -86,6 +86,8 @@ Colors::ColorRgbw toRgb(Colors::ColorCustom const & color)
     }
     }
 
+    newColor = colorScaleBrightness(newColor, color.brightness);
+
     return newColor;
 }
 
