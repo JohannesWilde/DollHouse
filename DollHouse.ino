@@ -1,7 +1,7 @@
 #include "dollHouseButtons.hpp"
 #include "dollHouseStatemachine.hpp"
 
-#include "ArduinoDrivers/ArduinoUno.hpp"
+#include "ArduinoDrivers/attinyX4.hpp"
 #include "ArduinoDrivers/dummytypes.hpp"
 
 #include "ArduinoDrivers/parallelinshiftregister74hc165.hpp"
@@ -13,7 +13,7 @@
 #include "helpers/crc16.hpp"
 #include "helpers/tmpLoop.hpp"
 
-#include <Adafruit_NeoPixel.h>
+#include <Adafruit_NeoPixel_PortA.h>
 
 #include <avr/eeprom.h>
 #include <avr/interrupt.h>
@@ -46,15 +46,15 @@ uint8_t constexpr shiftRegisterBitsCount = 8;
 static_assert(shiftRegisterBitsCount >= DollHouse::numberOfButtons);
 
 typedef ParallelInShiftRegister74HC165<shiftRegisterBitsCount,
-                                       ArduinoUno::A3,
-                                       ArduinoUno::A2,
+                                       ATtinyX4::pinB0,
+                                       ATtinyX4::pinB1,
                                        DummyAvrPin1,
-                                       ArduinoUno::A4,
+                                       ATtinyX4::pinB2,
                                        DummyAvrPin1,
                                        DummyAvrPin1> buttonsInShiftRegister;
 
 
-int constexpr pinLedsStrip = 6;
+int constexpr pinLedsStrip = A;
 uint16_t constexpr ledsCount = 12;
 static Adafruit_NeoPixel ledsStrip(ledsCount, pinLedsStrip, NEO_GRBW + NEO_KHZ800);
 
@@ -241,13 +241,13 @@ void loop()
 {
     // Notify error
     // initialize digital pin LED_BUILTIN as an output.
-    pinMode(LED_BUILTIN, OUTPUT);
+    // pinMode(LED_BUILTIN, OUTPUT);
   
     while (true)
     {
-        digitalWrite(LED_BUILTIN, HIGH);  // turn the LED on (HIGH is the voltage level)
+        // digitalWrite(LED_BUILTIN, HIGH);  // turn the LED on (HIGH is the voltage level)
         delay(1000);                      // wait for a second
-        digitalWrite(LED_BUILTIN, LOW);   // turn the LED off by making the voltage LOW
+        // digitalWrite(LED_BUILTIN, LOW);   // turn the LED off by making the voltage LOW
         delay(1000);                      // wait for a second
     }
 }
