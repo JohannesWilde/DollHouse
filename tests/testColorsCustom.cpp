@@ -2,14 +2,23 @@
 
 #include <cassert>
 #include <iostream>
+#include <vector>
 
 int main(int argc, char* argv[])
 {
-    Colors::ColorCustom const inputColor(0., 0.);
+    std::vector<Colors::ColorCustom> const inputColors{{0., 0.}, {0., 1.}, };
+    std::vector<Colors::ColorRgbw> const expectedColors{{0, 0, 0}, {255, 255, 255}, };
 
-    Colors::ColorRgbw const outputColor = Colors::SevenSegmentRgb::toRgb(inputColor);
+    assert(inputColors.size() == expectedColors.size());
 
-    assert((0 == outputColor.red) && (0 == outputColor.green) && (0 == outputColor.blue));
+    for (size_t index = 0; inputColors.size() > index; ++index)
+    {
+        Colors::ColorRgbw const outputColor = Colors::SevenSegmentRgb::toRgb(inputColors[index]);
+
+        assert((expectedColors[index].red == outputColor.red) &&
+               (expectedColors[index].green == outputColor.green) &&
+               (expectedColors[index].blue == outputColor.blue));
+    }
 
     std::cout << "testColorsCustom succeeded." << std::endl;
 }
