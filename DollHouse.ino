@@ -26,7 +26,6 @@
 #include <string.h>
 
 
-
 // https://stackoverflow.com/questions/6938219/how-to-check-whether-all-bytes-in-a-memory-block-are-zero
 static int memvcmp(uint8_t const * memory, uint8_t const value, size_t byteLength)
 {
@@ -135,8 +134,8 @@ void setup()
     buttonsInShiftRegister::enableClock();
 
     // variables
-    static Colors::ColorCustom settingsColors[DollHouse::numberOfButtons] = {};
-    static Colors::ColorCustom displayColors[DollHouse::numberOfButtons] = {};
+    static Colors::ColorCustomFixed settingsColors[DollHouse::numberOfButtons] = {};
+    static Colors::ColorCustomFixed displayColors[DollHouse::numberOfButtons] = {};
 
     // load settings from EEPROM
     // Load from Eeprom.
@@ -146,7 +145,7 @@ void setup()
         // Default to full white explicitely.
         for (size_t index = 0; index < DollHouse::numberOfButtons; ++index)
         {
-            settingsColors[index] = Colors::ColorCustom(1.0, 1.0);
+            settingsColors[index] = Colors::ColorCustomFixed(0, 255);
         }
     }
 
@@ -212,11 +211,11 @@ void setup()
 
         if (DollHouse::updateDisplay)
         {
-            // convert Colors::ColorCustom to RGB
+            // convert Colors::ColorCustomFixed to RGB
             for (size_t index = 0; index < ledsStrip.numPixels(); ++index)
             {
                 Colors::ColorRgbw const colorRgb = Colors::SevenSegmentRgb::toRgb(displayColors[index]);
-                ledsStrip.setPixelColor(index, Adafruit_NeoPixel::Color(colorRgb.red, colorRgb.green, colorRgb.blue));
+                ledsStrip.setPixelColor(index, colorRgb.red, colorRgb.green, colorRgb.blue);
             }
             // show NEO-pixels
             ledsStrip.show();

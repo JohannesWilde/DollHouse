@@ -16,7 +16,7 @@ StateHue const stateHue;
 
 void StateOff::init(DataType & data) const
 {
-    data.displayColor = Colors::ColorCustom(0., 0.);
+    data.displayColor = Colors::ColorCustomFixed(0, 0);
     updateDisplay = true;
 }
 
@@ -86,9 +86,9 @@ Helpers::AbstractState<DataType> const & StateBrightness::process(DataType & dat
     if (DollHouse::buttonIsDownLong(data.buttonIndex))
     {
         // As long as button stays down, modify brightness.
-        static constexpr float brightnessStepSingle = 1./256.;
-        static constexpr float brightnessStep = 2. * brightnessStepSingle;
-        static constexpr float brightnessMin = 2. * brightnessStepSingle;
+        static constexpr uint8_t brightnessStepSingle = 1;
+        static constexpr uint8_t brightnessStep = 2 * brightnessStepSingle;
+        static constexpr uint8_t brightnessMin = 2 * brightnessStepSingle;
         if (data.incrementBrightness)
         {
             float const newBrightness = data.displayColor.brightness + brightnessStep;

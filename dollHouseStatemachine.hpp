@@ -3,7 +3,7 @@
 
 #include "ArduinoDrivers/buttonTimed.hpp"
 
-#include "colors/colorCustom.hpp"
+#include "colors/colorCustomFixed.hpp"
 #include "colors/sevenSegmentRgb.hpp"
 
 #include "helpers/statemachine.hpp"
@@ -18,8 +18,8 @@ extern bool updateDisplay;
 
 struct DataType
 {
-    Colors::ColorCustom & settingsColor;
-    Colors::ColorCustom & displayColor;
+    Colors::ColorCustomFixed & settingsColor;
+    Colors::ColorCustomFixed & displayColor;
     size_t const buttonIndex;
     bool incrementBrightness = false;
     ButtonTimedProperties::Duration_t stateTimeout = 0;
