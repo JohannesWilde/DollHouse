@@ -6,7 +6,7 @@
 
 #include "ArduinoDrivers/parallelinshiftregister74hc165.hpp"
 
-// #include "colors/colorRgbw.cpp"
+#include "colors/colorRgbw.cpp"
 #include "colors/sevenSegmentRgb.hpp"
 #include "colors/sevenSegmentRgb.cpp"
 
