@@ -35,6 +35,7 @@ public:
 };
 
 // Scale components independently to range [0, 255]. Outliers will be clipped.
+ColorRgbw colorScaleBrightness(ColorRgbw const & input, uint8_t const scaleFactor);
 ColorRgbw colorScaleBrightness(ColorRgbw const & input, double const & scaleFactor);
 
 // Sum up components of colors independently. Saturates at 0xff for each component.

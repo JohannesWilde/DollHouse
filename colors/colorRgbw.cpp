@@ -2,23 +2,31 @@
 
 namespace // anonymous namespace
 {
-	
+
+inline uint8_t scaleColorPart(uint8_t const input, uint8_t const scaleFactor)
+{
+    uint16_t scaledValue = input;
+    scaledValue *= scaleFactor;
+    scaledValue /= 255;
+    return static_cast<uint8_t>(scaledValue);
+}
+
 inline uint8_t scaleColorPart(uint8_t const input, double const & scaleFactor)
 {
     // this uses approximately 1200 bytes of flash storage!
-	double const scaledValue = static_cast<double>(input) * scaleFactor;
-	if (255. < scaledValue)
-	{
-		return 255;
-	}
+    double const scaledValue = static_cast<double>(input) * scaleFactor;
+    if (255. < scaledValue)
+    {
+        return 255;
+    }
     else if (0. > scaledValue)
-	{
-		return 0;
-	}
-	else
-	{
-		return static_cast<uint8_t>(scaledValue);
-	}
+    {
+        return 0;
+    }
+    else
+    {
+        return static_cast<uint8_t>(scaledValue);
+    }
 }
 
 inline uint8_t addColorPart(uint8_t const one, uint8_t const two)
@@ -37,6 +45,14 @@ inline uint8_t addColorPart(uint8_t const one, uint8_t const two)
 
 namespace Colors
 {
+
+ColorRgbw colorScaleBrightness(ColorRgbw const & input, uint8_t const scaleFactor)
+{
+    return Colors::ColorRgbw(scaleColorPart(input.red   , scaleFactor),
+                             scaleColorPart(input.green , scaleFactor),
+                             scaleColorPart(input.blue  , scaleFactor),
+                             scaleColorPart(input.white , scaleFactor));
+}
 
 ColorRgbw colorScaleBrightness(ColorRgbw const & input, double const & scaleFactor)
 {

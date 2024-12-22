@@ -1,6 +1,7 @@
 
 add_library(customColors
     colorCustom.hpp
+    colorCustomFixed.hpp
     colorRgbw.cpp
     colorRgbw.hpp
     sevenSegmentRgb.cpp
