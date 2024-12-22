@@ -28,14 +28,14 @@ int main(int argc, char* argv[])
 
     // statemachine
     DollHouse::DataType dataTypes[DollHouse::numberOfButtons] = {
-        {settingsColors[0], saveSettings, displayColors[0], updateDisplay, 0, },
-        {settingsColors[1], saveSettings, displayColors[1], updateDisplay, 1, },
-        {settingsColors[2], saveSettings, displayColors[2], updateDisplay, 2, },
-        {settingsColors[3], saveSettings, displayColors[3], updateDisplay, 3, },
-        {settingsColors[4], saveSettings, displayColors[4], updateDisplay, 4, },
-        {settingsColors[5], saveSettings, displayColors[5], updateDisplay, 5, },
-        {settingsColors[6], saveSettings, displayColors[6], updateDisplay, 6, },
-        {settingsColors[7], saveSettings, displayColors[7], updateDisplay, 7, },
+        {0, 0, },
+        {1, 1, },
+        {2, 2, },
+        {3, 3, },
+        {4, 4, },
+        {5, 5, },
+        {6, 6, },
+        {7, 7, },
     };
 
     Helpers::Statemachine<DollHouse::DataType> statemachines[DollHouse::numberOfButtons] = {

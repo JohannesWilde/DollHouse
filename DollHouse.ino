@@ -133,32 +133,28 @@ void setup()
     buttonsInShiftRegister::initialize();
     buttonsInShiftRegister::enableClock();
 
-    // variables
-    static Colors::ColorCustomFixed settingsColors[DollHouse::numberOfButtons] = {};
-    static Colors::ColorCustomFixed displayColors[DollHouse::numberOfButtons] = {};
-
     // load settings from EEPROM
     // Load from Eeprom.
-    bool const readBack = Eeprom::readWithCrc(settingsColors, sizeof(settingsColors), Eeprom::Addresses::backupValues);
+    bool const readBack = Eeprom::readWithCrc(DollHouse::settingsColors, sizeof(DollHouse::settingsColors), Eeprom::Addresses::backupValues);
     if (!readBack)
     {
         // Default to full white explicitely.
         for (size_t index = 0; index < DollHouse::numberOfButtons; ++index)
         {
-            settingsColors[index] = Colors::ColorCustomFixed(0, 255);
+            DollHouse::settingsColors[index] = Colors::ColorCustomFixed(0, 255);
         }
     }
 
     // statemachine
-    DollHouse::DataType dataTypes[DollHouse::numberOfButtons] = {
-        {settingsColors[0], displayColors[0], 0, },
-        {settingsColors[1], displayColors[1], 1, },
-        {settingsColors[2], displayColors[2], 2, },
-        {settingsColors[3], displayColors[3], 3, },
-        {settingsColors[4], displayColors[4], 4, },
-        {settingsColors[5], displayColors[5], 5, },
-        {settingsColors[6], displayColors[6], 6, },
-        {settingsColors[7], displayColors[7], 7, },
+     DollHouse::DataType dataTypes[DollHouse::numberOfButtons] = {
+        {0, 0, },
+        {1, 1, },
+        {2, 2, },
+        {3, 3, },
+        {4, 4, },
+        {5, 5, },
+        {6, 6, },
+        {7, 7, },
         };
 
     Helpers::Statemachine<DollHouse::DataType> statemachines[DollHouse::numberOfButtons] = {
@@ -214,7 +210,7 @@ void setup()
             // convert Colors::ColorCustomFixed to RGB
             for (size_t index = 0; index < ledsStrip.numPixels(); ++index)
             {
-                Colors::ColorRgbw const colorRgb = Colors::SevenSegmentRgb::toRgb(displayColors[index]);
+                Colors::ColorRgbw const colorRgb = Colors::SevenSegmentRgb::toRgb(DollHouse::displayColors[index]);
                 ledsStrip.setPixelColor(index, colorRgb.red, colorRgb.green, colorRgb.blue);
             }
             // show NEO-pixels
@@ -225,8 +221,8 @@ void setup()
         if (DollHouse::saveSettings)
         {
             // // Save to Eeprom.
-            static_assert(E2END >= (Eeprom::Addresses::backupValues + sizeof(settingsColors) + 2 /* CRC */ - 1 /* index */));
-            Eeprom::writeWithCrc(settingsColors, sizeof(settingsColors), Eeprom::Addresses::backupValues);
+            static_assert(E2END >= (Eeprom::Addresses::backupValues + sizeof(DollHouse::settingsColors) + 2 /* CRC */ - 1 /* index */));
+            Eeprom::writeWithCrc(DollHouse::settingsColors, sizeof(DollHouse::settingsColors), Eeprom::Addresses::backupValues);
             DollHouse::saveSettings = false;
         }
 

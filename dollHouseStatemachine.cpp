@@ -6,7 +6,9 @@
 namespace DollHouse
 {
 
+Colors::ColorCustomFixed settingsColors[ledsCount] = {};
 bool saveSettings = false;
+Colors::ColorCustomFixed displayColors[ledsCount] = {};
 bool updateDisplay = false;
 
 StateOff const stateOff;
@@ -16,7 +18,7 @@ StateHue const stateHue;
 
 void StateOff::init(DataType & data) const
 {
-    data.displayColor = Colors::ColorCustomFixed(0, 0);
+    displayColors[data.ledIndex] = Colors::ColorCustomFixed(0, 0);
     updateDisplay = true;
 }
 
@@ -42,7 +44,7 @@ void StateOff::deinit(DataType & data) const
 
 void StateOn::init(DataType & data) const
 {
-    data.displayColor = data.settingsColor;
+    displayColors[data.ledIndex] = settingsColors[data.ledIndex];
     updateDisplay = true;
 }
 
@@ -91,25 +93,22 @@ Helpers::AbstractState<DataType> const & StateBrightness::process(DataType & dat
         static constexpr uint8_t brightnessMin = 2 * brightnessStepSingle;
         if (data.incrementBrightness)
         {
-            if (255 != data.displayColor.brightness)
+            if (255 != displayColors[data.ledIndex].brightness)
             {
-                data.displayColor.brightness += brightnessStep;
+                displayColors[data.ledIndex].brightness += brightnessStep;
             }
         }
         else
         {
-            uint8_t newBrightness = data.displayColor.brightness;
-            if (brightnessStep <= newBrightness)
+            if (brightnessStep <= displayColors[data.ledIndex].brightness)
             {
-                newBrightness -= brightnessStep;
+                displayColors[data.ledIndex].brightness -= brightnessStep;
             }
             // Prevent on and off state being indistinguishable.
-            if (brightnessMin > newBrightness)
+            if (brightnessMin > displayColors[data.ledIndex].brightness)
             {
-                newBrightness = brightnessMin;
+                displayColors[data.ledIndex].brightness = brightnessMin;
             }
-
-            data.displayColor.brightness = newBrightness;
         }
         updateDisplay = true;
     }
@@ -123,7 +122,7 @@ Helpers::AbstractState<DataType> const & StateBrightness::process(DataType & dat
 
 void StateBrightness::deinit(DataType & data) const
 {
-    data.settingsColor = data.displayColor;
+    settingsColors[data.ledIndex].brightness = displayColors[data.ledIndex].brightness;
     saveSettings = true;
 }
 
@@ -139,7 +138,7 @@ Helpers::AbstractState<DataType> const & StateHue::process(DataType & data) cons
     if (DollHouse::buttonIsSingleDownShortFinished(data.buttonIndex))
     {
         // Change to next major hue.
-        data.displayColor.hue = Colors::SevenSegmentRgb::nextMajorHue(data.displayColor.hue);
+        displayColors[data.ledIndex].hue = Colors::SevenSegmentRgb::nextMajorHue(displayColors[data.ledIndex].hue);
 
         updateDisplay = true;
         // Reset timeout while the user still interacts with this state.
@@ -148,12 +147,7 @@ Helpers::AbstractState<DataType> const & StateHue::process(DataType & data) cons
     else if (DollHouse::buttonIsDownLong(data.buttonIndex))
     {
         // Change hue continuously.
-        float nextHue = data.displayColor.hue + 5.f * Colors::SevenSegmentRgb::singleDeltaHueUint16();
-        if (1. <= nextHue)
-        {
-            nextHue -= 1.;
-        }
-        data.displayColor.hue = nextHue;
+        displayColors[data.ledIndex].hue += 5 * Colors::SevenSegmentRgb::singleDeltaHueUint16();
 
         updateDisplay = true;
         // Reset timeout while the user still interacts with this state.
@@ -172,7 +166,7 @@ Helpers::AbstractState<DataType> const & StateHue::process(DataType & data) cons
 
 void StateHue::deinit(DataType & data) const
 {
-    data.settingsColor = data.displayColor;
+    settingsColors[data.ledIndex] = displayColors[data.ledIndex];
     saveSettings = true;
 }
 

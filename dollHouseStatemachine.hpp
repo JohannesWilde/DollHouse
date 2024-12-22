@@ -13,14 +13,17 @@
 namespace DollHouse
 {
 
+uint8_t constexpr ledsCount = 9; // todo: move to config-header
+
+extern Colors::ColorCustomFixed settingsColors[ledsCount];
 extern bool saveSettings;
+extern Colors::ColorCustomFixed displayColors[ledsCount];
 extern bool updateDisplay;
 
 struct DataType
 {
-    Colors::ColorCustomFixed & settingsColor; // todo: use index instead of these references
-    Colors::ColorCustomFixed & displayColor;
-    size_t const buttonIndex;
+    uint8_t const ledIndex;
+    uint8_t const buttonIndex;
     bool incrementBrightness = false;
     ButtonTimedProperties::Duration_t stateTimeout = 0;
 };
