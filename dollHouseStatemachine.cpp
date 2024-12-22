@@ -91,27 +91,25 @@ Helpers::AbstractState<DataType> const & StateBrightness::process(DataType & dat
         static constexpr uint8_t brightnessMin = 2 * brightnessStepSingle;
         if (data.incrementBrightness)
         {
-            float const newBrightness = data.displayColor.brightness + brightnessStep;
-            if (1. < newBrightness)
+            if (255 != data.displayColor.brightness)
             {
-                data.displayColor.brightness = 1.;
-            }
-            else
-            {
-                data.displayColor.brightness = newBrightness;
+                data.displayColor.brightness += brightnessStep;
             }
         }
         else
         {
-            float const newBrightness = data.displayColor.brightness - brightnessStep;
+            uint8_t newBrightness = data.displayColor.brightness;
+            if (brightnessStep <= newBrightness)
+            {
+                newBrightness -= brightnessStep;
+            }
+            // Prevent on and off state being indistinguishable.
             if (brightnessMin > newBrightness)
             {
-                data.displayColor.brightness = brightnessMin; // Prevent on and off state being indistinguishable.
+                newBrightness = brightnessMin;
             }
-            else
-            {
-                data.displayColor.brightness = newBrightness;
-            }
+
+            data.displayColor.brightness = newBrightness;
         }
         updateDisplay = true;
     }
