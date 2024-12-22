@@ -18,7 +18,7 @@ extern bool updateDisplay;
 
 struct DataType
 {
-    Colors::ColorCustomFixed & settingsColor;
+    Colors::ColorCustomFixed & settingsColor; // todo: use index instead of these references
     Colors::ColorCustomFixed & displayColor;
     size_t const buttonIndex;
     bool incrementBrightness = false;
