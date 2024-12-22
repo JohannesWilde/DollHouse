@@ -91,6 +91,75 @@ Colors::ColorRgbw toRgb(Colors::ColorCustom const & color)
     return newColor;
 }
 
+
+Colors::ColorRgbw toRgb(Colors::ColorCustomFixed const & color)
+{
+    ColorRgbw newColor;
+
+    uint16_t constexpr huePeriod = 65535 / 7;
+
+    uint16_t const hueBase = color.hue / huePeriod;
+    uint16_t const hueDiff = (color.hue - hueBase * huePeriod);
+    uint8_t const integerDiff = static_cast<uint8_t>(hueDiff * 7 / 257); // 255 * 7 / 65535 = 7 / 257
+
+    switch (hueBase)
+    {
+    case 7:
+        // fall through
+    case 0:
+    {
+        newColor = ColorRgbw(255, 255, 255);
+        newColor.green -= integerDiff;
+        break;
+    }
+    case 1:
+    {
+        newColor = ColorRgbw(255, 0, 255);
+        newColor.red -= integerDiff;
+        break;
+    }
+    case 2:
+    {
+        newColor = ColorRgbw(0, 0, 255);
+        newColor.green = integerDiff;
+        break;
+    }
+    case 3:
+    {
+        newColor = ColorRgbw(0, 255, 255);
+        newColor.blue -= integerDiff;
+        break;
+    }
+    case 4:
+    {
+        newColor = ColorRgbw(0, 255, 0);
+        newColor.red = integerDiff;
+        break;
+    }
+    case 5:
+    {
+        newColor = ColorRgbw(255, 255, 0);
+        newColor.green -= integerDiff;
+        break;
+    }
+    case 6:
+    {
+        newColor = ColorRgbw(255, 0, 0);
+        newColor.blue = integerDiff;
+        newColor.green = integerDiff;
+        break;
+    }
+    default:
+    {
+        // intentionally empty
+    }
+    }
+
+    newColor = colorScaleBrightness(newColor, color.brightness);
+
+    return newColor;
+}
+
 } // namespace SevenSegmentRgb
 
 } // namespace Colors

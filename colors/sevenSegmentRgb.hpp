@@ -2,7 +2,9 @@
 #define SEVEN_SEGMENT_RGB
 
 #include "colorCustom.hpp"
+#include "colorCustomFixed.hpp"
 #include "colorRgbw.hpp"
+
 
 namespace Colors
 {
@@ -24,6 +26,13 @@ constexpr float singleDeltaHue()
 }
 
 Colors::ColorRgbw toRgb(Colors::ColorCustom const & color);
+
+constexpr uint16_t singleDeltaHueUint16()
+{
+    return 65535 / (7 * 256);
+}
+
+Colors::ColorRgbw toRgb(Colors::ColorCustomFixed const & color);
 
 } // namespace SevenSegmentRgb
 
