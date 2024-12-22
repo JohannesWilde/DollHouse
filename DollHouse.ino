@@ -54,8 +54,8 @@ typedef ParallelInShiftRegister74HC165<shiftRegisterBitsCount,
                                        DummyAvrPin1> buttonsInShiftRegister;
 
 
-int constexpr pinLedsStrip = A;
-uint16_t constexpr ledsCount = 12;
+int constexpr pinLedsStrip = ATtinyX4::pinA0::pinNumber;
+uint16_t constexpr ledsCount = 9;
 static Adafruit_NeoPixel ledsStrip(ledsCount, pinLedsStrip, NEO_GRBW + NEO_KHZ800);
 
 
