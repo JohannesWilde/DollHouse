@@ -213,6 +213,7 @@ void setup()
             }
             // show NEO-pixels
             ledsStrip.show();
+            updateDisplay = false;
         }
 
         if (saveSettings)
@@ -220,6 +221,7 @@ void setup()
             // // Save to Eeprom.
             static_assert(E2END >= (Eeprom::Addresses::backupValues + sizeof(settingsColors) + 2 /* CRC */ - 1 /* index */));
             Eeprom::writeWithCrc(settingsColors, sizeof(settingsColors), Eeprom::Addresses::backupValues);
+            saveSettings = false;
         }
 
         delay(50); // idle for 50ms
