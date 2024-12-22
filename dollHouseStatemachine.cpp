@@ -6,6 +6,9 @@
 namespace DollHouse
 {
 
+bool saveSettings = false;
+bool updateDisplay = false;
+
 StateOff const stateOff;
 StateOn const stateOn;
 StateBrightness const stateBrightness;
@@ -14,7 +17,7 @@ StateHue const stateHue;
 void StateOff::init(DataType & data) const
 {
     data.displayColor = Colors::ColorCustom(0., 0.);
-    data.updateDisplay = true;
+    updateDisplay = true;
 }
 
 Helpers::AbstractState<DataType> const & StateOff::process(DataType & data) const
@@ -40,7 +43,7 @@ void StateOff::deinit(DataType & data) const
 void StateOn::init(DataType & data) const
 {
     data.displayColor = data.settingsColor;
-    data.updateDisplay = true;
+    updateDisplay = true;
 }
 
 Helpers::AbstractState<DataType> const & StateOn::process(DataType & data) const
@@ -110,7 +113,7 @@ Helpers::AbstractState<DataType> const & StateBrightness::process(DataType & dat
                 data.displayColor.brightness = newBrightness;
             }
         }
-        data.updateDisplay = true;
+        updateDisplay = true;
     }
     else
     {
@@ -123,7 +126,7 @@ Helpers::AbstractState<DataType> const & StateBrightness::process(DataType & dat
 void StateBrightness::deinit(DataType & data) const
 {
     data.settingsColor = data.displayColor;
-    data.saveSettings = true;
+    saveSettings = true;
 }
 
 
@@ -140,7 +143,7 @@ Helpers::AbstractState<DataType> const & StateHue::process(DataType & data) cons
         // Change to next major hue.
         data.displayColor.hue = Colors::SevenSegmentRgb::nextMajorHue(data.displayColor.hue);
 
-        data.updateDisplay = true;
+        updateDisplay = true;
         // Reset timeout while the user still interacts with this state.
         data.stateTimeout = DollHouse::durationStateTimeout;
     }
@@ -154,7 +157,7 @@ Helpers::AbstractState<DataType> const & StateHue::process(DataType & data) cons
         }
         data.displayColor.hue = nextHue;
 
-        data.updateDisplay = true;
+        updateDisplay = true;
         // Reset timeout while the user still interacts with this state.
         data.stateTimeout = DollHouse::durationStateTimeout;
     }
@@ -172,7 +175,7 @@ Helpers::AbstractState<DataType> const & StateHue::process(DataType & data) cons
 void StateHue::deinit(DataType & data) const
 {
     data.settingsColor = data.displayColor;
-    data.saveSettings = true;
+    saveSettings = true;
 }
 
 

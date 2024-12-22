@@ -13,12 +13,13 @@
 namespace DollHouse
 {
 
+extern bool saveSettings;
+extern bool updateDisplay;
+
 struct DataType
 {
     Colors::ColorCustom & settingsColor;
-    bool & saveSettings;
     Colors::ColorCustom & displayColor;
-    bool & updateDisplay;
     size_t const buttonIndex;
     bool incrementBrightness = false;
     ButtonTimedProperties::Duration_t stateTimeout = 0;

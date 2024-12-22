@@ -136,9 +136,7 @@ void setup()
 
     // variables
     static Colors::ColorCustom settingsColors[DollHouse::numberOfButtons] = {};
-    static bool saveSettings = false;
     static Colors::ColorCustom displayColors[DollHouse::numberOfButtons] = {};
-    static bool updateDisplay = true;
 
     // load settings from EEPROM
     // Load from Eeprom.
@@ -154,14 +152,14 @@ void setup()
 
     // statemachine
     DollHouse::DataType dataTypes[DollHouse::numberOfButtons] = {
-        {settingsColors[0], saveSettings, displayColors[0], updateDisplay, 0, },
-        {settingsColors[1], saveSettings, displayColors[1], updateDisplay, 1, },
-        {settingsColors[2], saveSettings, displayColors[2], updateDisplay, 2, },
-        {settingsColors[3], saveSettings, displayColors[3], updateDisplay, 3, },
-        {settingsColors[4], saveSettings, displayColors[4], updateDisplay, 4, },
-        {settingsColors[5], saveSettings, displayColors[5], updateDisplay, 5, },
-        {settingsColors[6], saveSettings, displayColors[6], updateDisplay, 6, },
-        {settingsColors[7], saveSettings, displayColors[7], updateDisplay, 7, },
+        {settingsColors[0], displayColors[0], 0, },
+        {settingsColors[1], displayColors[1], 1, },
+        {settingsColors[2], displayColors[2], 2, },
+        {settingsColors[3], displayColors[3], 3, },
+        {settingsColors[4], displayColors[4], 4, },
+        {settingsColors[5], displayColors[5], 5, },
+        {settingsColors[6], displayColors[6], 6, },
+        {settingsColors[7], displayColors[7], 7, },
         };
 
     Helpers::Statemachine<DollHouse::DataType> statemachines[DollHouse::numberOfButtons] = {
@@ -212,7 +210,7 @@ void setup()
         }
         // Serial.println("");
 
-        if (updateDisplay)
+        if (DollHouse::updateDisplay)
         {
             // convert Colors::ColorCustom to RGB
             for (size_t index = 0; index < ledsStrip.numPixels(); ++index)
@@ -222,15 +220,15 @@ void setup()
             }
             // show NEO-pixels
             ledsStrip.show();
-            updateDisplay = false;
+            DollHouse::updateDisplay = false;
         }
 
-        if (saveSettings)
+        if (DollHouse::saveSettings)
         {
             // // Save to Eeprom.
             static_assert(E2END >= (Eeprom::Addresses::backupValues + sizeof(settingsColors) + 2 /* CRC */ - 1 /* index */));
             Eeprom::writeWithCrc(settingsColors, sizeof(settingsColors), Eeprom::Addresses::backupValues);
-            saveSettings = false;
+            DollHouse::saveSettings = false;
         }
 
         delay(50); // idle for 50ms
