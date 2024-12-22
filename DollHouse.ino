@@ -1,12 +1,14 @@
+#include "dollHouseButtons.hpp"
+#include "dollHouseStatemachine.hpp"
+
 #include "ArduinoDrivers/ArduinoUno.hpp"
 #include "ArduinoDrivers/dummytypes.hpp"
 
 #include "ArduinoDrivers/parallelinshiftregister74hc165.hpp"
 
-#include "ArduinoDrivers/button.hpp"
-#include "ArduinoDrivers/buttonTimed.hpp"
-#include "ArduinoDrivers/simplePinAvr.hpp"
-#include "ArduinoDrivers/simplePinBit.hpp"
+// #include "colors/colorRgbw.cpp"
+#include "colors/sevenSegmentRgb.hpp"
+#include "colors/sevenSegmentRgb.cpp"
 
 #include "helpers/crc16.hpp"
 #include "helpers/tmpLoop.hpp"
@@ -39,18 +41,9 @@ static int memvcmp(uint8_t const * memory, uint8_t const value, size_t byteLengt
     }
 }
 
-uint8_t incrementUint8Capped(uint8_t const value)
-{
-    uint8_t newValue = value;
-    if (newValue < UCHAR_MAX)
-    {
-        ++newValue;
-    }
-    return newValue;
-}
-
 
 uint8_t constexpr shiftRegisterBitsCount = 8;
+static_assert(shiftRegisterBitsCount >= DollHouse::numberOfButtons);
 
 typedef ParallelInShiftRegister74HC165<shiftRegisterBitsCount,
                                        ArduinoUno::A3,
@@ -61,157 +54,39 @@ typedef ParallelInShiftRegister74HC165<shiftRegisterBitsCount,
                                        DummyAvrPin1> buttonsInShiftRegister;
 
 
-uint8_t constexpr shortPressCount = 2;
-uint8_t constexpr longPressCount = 8;
-
-static uint8_t dataIn[1] = {0x00, };
-
-template <uint8_t index>
-class Buttons;
-
-template <> class Buttons< 0> : public ButtonTimed<Button<SimplePinBitRead<0, dataIn, 0>, SimplePin::State::Zero>, shortPressCount, longPressCount> {/* intentionally empty */};
-template <> class Buttons< 1> : public ButtonTimed<Button<SimplePinBitRead<1, dataIn, 0>, SimplePin::State::Zero>, shortPressCount, longPressCount> {/* intentionally empty */};
-template <> class Buttons< 2> : public ButtonTimed<Button<SimplePinBitRead<2, dataIn, 0>, SimplePin::State::Zero>, shortPressCount, longPressCount> {/* intentionally empty */};
-template <> class Buttons< 3> : public ButtonTimed<Button<SimplePinBitRead<3, dataIn, 0>, SimplePin::State::Zero>, shortPressCount, longPressCount> {/* intentionally empty */};
-template <> class Buttons< 4> : public ButtonTimed<Button<SimplePinBitRead<4, dataIn, 0>, SimplePin::State::Zero>, shortPressCount, longPressCount> {/* intentionally empty */};
-template <> class Buttons< 5> : public ButtonTimed<Button<SimplePinBitRead<5, dataIn, 0>, SimplePin::State::Zero>, shortPressCount, longPressCount> {/* intentionally empty */};
-template <> class Buttons< 6> : public ButtonTimed<Button<SimplePinBitRead<6, dataIn, 0>, SimplePin::State::Zero>, shortPressCount, longPressCount> {/* intentionally empty */};
-template <> class Buttons< 7> : public ButtonTimed<Button<SimplePinBitRead<7, dataIn, 0>, SimplePin::State::Zero>, shortPressCount, longPressCount> {/* intentionally empty */};
-
-
 int constexpr pinLedsStrip = 6;
 uint16_t constexpr ledsCount = 12;
 static Adafruit_NeoPixel ledsStrip(ledsCount, pinLedsStrip, NEO_GRBW + NEO_KHZ800);
 
 
-// Wrappers for loops.
-template<uint8_t Index>
-struct WrapperInitialize
-{
-    static void impl()
-    {
-        Buttons<Index>::initialize();
-    }
-};
+// template<uint8_t Index>
+// struct WrapperLogButton
+// {
+//     static void impl()
+//     {
+//         static bool wasDown = false;
+//         static bool wasDownLong = false;
 
+//         if (!wasDown && Buttons<Index>::isDown())
+//         {
+//             wasDown = true;
+//             Serial.print("Button ");
+//             Serial.print(Index);
+//             Serial.print(" down short");
+//             Serial.println(".");
+//         }
+//         else if (!wasDownLong && Buttons<Index>::isDownLong())
+//         {
+//             Serial.print("Button ");
+//             Serial.print(Index);
+//             Serial.print(" down long");
+//             Serial.println(".");
+//         }
 
-template<uint8_t Index>
-struct WrapperDeinitialize
-{
-    static void impl()
-    {
-        Buttons<Index>::deinitialize();
-    }
-};
-
-
-template<uint8_t Index>
-struct WrapperUpdate
-{
-    static void impl()
-    {
-        Buttons<Index>::update();
-    }
-};
-
-
-template<uint8_t Index>
-struct WrapperLogButton
-{
-    static void impl()
-    {
-        static bool wasDown = false;
-        static bool wasDownLong = false;
-
-        if (!wasDown && Buttons<Index>::isDown())
-        {
-            wasDown = true;
-            Serial.print("Button ");
-            Serial.print(Index);
-            Serial.print(" down short");
-            Serial.println(".");
-        }
-        else if (!wasDownLong && Buttons<Index>::isDownLong())
-        {
-            Serial.print("Button ");
-            Serial.print(Index);
-            Serial.print(" down long");
-            Serial.println(".");
-        }
-
-        wasDown = Buttons<Index>::isDown();
-        wasDownLong = Buttons<Index>::isDownLong();
-    }
-};
-
-template<uint8_t Index>
-struct WrapperLightFromButtons
-{
-    static void impl(Adafruit_NeoPixel & ledsStrip)
-    {
-        if (Buttons<Index>::isDownShort())
-        {
-            ledsStrip.setPixelColor(Index, Adafruit_NeoPixel::Color(150, 0, 0));
-        }
-        else if (Buttons<Index>::isDownLong())
-        {
-            ledsStrip.setPixelColor(Index, Adafruit_NeoPixel::Color(0, 150, 0));
-        }
-        else
-        {
-            ledsStrip.setPixelColor(Index, Adafruit_NeoPixel::Color(0, 0, 0));
-        }
-    }
-};
-
-
-enum class Mode
-{
-    Default
-};
-
-
-template<uint8_t Index>
-struct WrapperCountButtonsReleasedAfterShort
-{
-    static_assert(shiftRegisterBitsCount > Index);
-
-    static void impl(uint8_t & count)
-    {
-        if (Buttons<Index>::releasedAfterShort())
-        {
-            ++count;
-        }
-    }
-};
-
-/* Never use this for actual HW buttons - but only for the update from a level input. */
-template<uint8_t Index>
-struct WrapperCountButtonsPressed_
-{
-    static_assert(shiftRegisterBitsCount > Index);
-
-    static void impl(uint8_t & count)
-    {
-        if (Button<SimplePinBitRead<Index % 8, dataIn, Index / 8>, SimplePin::State::One>::isDown())
-        {
-            ++count;
-        }
-    }
-};
-
-
-struct BackupValues
-{
-    // uint8_t dataOut[4];
-    Mode mode;
-
-    BackupValues(Mode const mode)
-        : mode(mode)
-    {
-        // memcpy(dataOut, dataOut_, sizeof(dataOut));
-    }
-};
+//         wasDown = Buttons<Index>::isDown();
+//         wasDownLong = Buttons<Index>::isDownLong();
+//     }
+// };
 
 
 namespace Eeprom
@@ -223,8 +98,6 @@ namespace Addresses
 {
 
 static Address constexpr backupValues = 0;
-
-static_assert(E2END >= (backupValues + sizeof(BackupValues) + 2 /* CRC */ - 1 /* index */));
 
 } // namespace Addresses
 
@@ -253,65 +126,101 @@ bool readWithCrc(void * const data, size_t const byteCount, Address const eeprom
     return (crc.get() == crcValue);
 }
 
-
 } // namespace Eeprom
 
 
 
 void setup()
 {
-    // initialize leds
+    // initialize
     ledsStrip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
     ledsStrip.show();            // Turn OFF all pixels ASAP
     // ledsStrip.setBrightness(Adafruit_NeoPixel::gamma8(255));
 
-    Serial.begin(9600);
-    Serial.println("Doll house v0.1");
+    static_assert(0 < sizeof(DollHouse::buttonsMemory));
+    memset(DollHouse::buttonsMemory, 0, sizeof(DollHouse::buttonsMemory) / sizeof(DollHouse::buttonsMemory[0]));
+    Helpers::TMP::Loop<DollHouse::numberOfButtons, DollHouse::WrapperInitialize>::impl();
+
+    // Serial.begin(9600);
+    // Serial.println("Doll house v0.2");
 
     buttonsInShiftRegister::initialize();
     buttonsInShiftRegister::enableClock();
 
-    Mode mode = Mode::Default;
+    // variables
+    static Colors::ColorCustom settingsColors[DollHouse::numberOfButtons] = {};
+    static bool saveSettings = false;
+    static Colors::ColorCustom displayColors[DollHouse::numberOfButtons] = {};
+    static bool updateDisplay = true;
 
-    // // Save to Eeprom.
-    // BackupValues backupValues(mode);
-    // Eeprom::writeWithCrc(&backupValues, sizeof(BackupValues), Eeprom::Addresses::backupValues);
+    // load settings from EEPROM
+    // Load from Eeprom.
+    bool const readBack = Eeprom::readWithCrc(settingsColors, sizeof(settingsColors), Eeprom::Addresses::backupValues);
+    if (!readBack)
+    {
+        // Default to full white explicitely.
+        for (size_t index = 0; index < DollHouse::numberOfButtons; ++index)
+        {
+            settingsColors[index] = Colors::ColorCustom(1.0, 1.0);
+        }
+    }
 
-    // // Load from Eeprom.
-    // BackupValues backupValues(mode);
-    // bool const readBack = Eeprom::readWithCrc(&backupValues, sizeof(BackupValues), Eeprom::Addresses::backupValues);
-    // if (!readBack)
-    // {
-    //     backupValues = BackupValues(mode);
-    // }
-    // else
-    // {
-    //     // Use default values explicitely.
-    //     mode = backupValues.mode;
-    // }
+    // statemachine
+    DollHouse::DataType dataTypes[DollHouse::numberOfButtons] = {
+        {settingsColors[0], saveSettings, displayColors[0], updateDisplay, 0, },
+        {settingsColors[1], saveSettings, displayColors[1], updateDisplay, 1, },
+        {settingsColors[2], saveSettings, displayColors[2], updateDisplay, 2, },
+        {settingsColors[3], saveSettings, displayColors[3], updateDisplay, 3, },
+        {settingsColors[4], saveSettings, displayColors[4], updateDisplay, 4, },
+        {settingsColors[5], saveSettings, displayColors[5], updateDisplay, 5, },
+        {settingsColors[6], saveSettings, displayColors[6], updateDisplay, 6, },
+        {settingsColors[7], saveSettings, displayColors[7], updateDisplay, 7, },
+        };
 
+    Helpers::Statemachine<DollHouse::DataType> statemachines[DollHouse::numberOfButtons] = {
+        Helpers::Statemachine(DollHouse::stateOff),
+        Helpers::Statemachine(DollHouse::stateOff),
+        Helpers::Statemachine(DollHouse::stateOff),
+        Helpers::Statemachine(DollHouse::stateOff),
+        Helpers::Statemachine(DollHouse::stateOff),
+        Helpers::Statemachine(DollHouse::stateOff),
+        Helpers::Statemachine(DollHouse::stateOff),
+        Helpers::Statemachine(DollHouse::stateOff),
+    };
+
+    // loop
     while (true)
     {
         // Latch bits in shift-register for read-out from the buttons.
         buttonsInShiftRegister::loadParallelToShiftregister();
         // Actually copy the latched shift-register values to data.
-        buttonsInShiftRegister::shiftOutBits(dataIn);
+        buttonsInShiftRegister::shiftOutBits(DollHouse::buttonsMemory);
 
-        Helpers::TMP::Loop<8, WrapperUpdate>::impl();
+        Helpers::TMP::Loop<DollHouse::numberOfButtons, DollHouse::WrapperUpdate>::impl();
 
-        switch (mode)
+        for (size_t index = 0; index < DollHouse::numberOfButtons; ++index)
         {
-        case Mode::Default:
-        {
-            Helpers::TMP::Loop<8, WrapperLogButton>::impl();
-
-            Helpers::TMP::Loop<8, WrapperLightFromButtons, Adafruit_NeoPixel &>::impl(ledsStrip);
-
-            break;
-        }
+            statemachines[index].process(dataTypes[index]);
         }
 
-        ledsStrip.show();
+        if (updateDisplay)
+        {
+            // convert Colors::ColorCustom to RGB
+            for (size_t index = 0; index < ledsStrip.numPixels(); ++index)
+            {
+                Colors::ColorRgbw const colorRgb = Colors::SevenSegmentRgb::toRgb(displayColors[index]);
+                ledsStrip.setPixelColor(index, Adafruit_NeoPixel::Color(colorRgb.red, colorRgb.green, colorRgb.blue));
+            }
+            // show NEO-pixels
+            ledsStrip.show();
+        }
+
+        if (saveSettings)
+        {
+            // // Save to Eeprom.
+            static_assert(E2END >= (Eeprom::Addresses::backupValues + sizeof(settingsColors) + 2 /* CRC */ - 1 /* index */));
+            Eeprom::writeWithCrc(settingsColors, sizeof(settingsColors), Eeprom::Addresses::backupValues);
+        }
 
         delay(50); // idle for 50ms
     }
