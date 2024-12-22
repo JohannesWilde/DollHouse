@@ -93,7 +93,7 @@ Helpers::AbstractState<DataType> const & StateBrightness::process(DataType & dat
         static constexpr uint8_t brightnessMin = 2 * brightnessStepSingle;
         if (data.incrementBrightness)
         {
-            if (255 != displayColors[data.ledIndex].brightness)
+            if ((255 - brightnessStep) >= displayColors[data.ledIndex].brightness)
             {
                 displayColors[data.ledIndex].brightness += brightnessStep;
             }
