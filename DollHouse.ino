@@ -64,27 +64,14 @@ static Adafruit_NeoPixel ledsStrip(ledsCount, pinLedsStrip, NEO_GRBW + NEO_KHZ80
 // {
 //     static void impl()
 //     {
-//         static bool wasDown = false;
-//         static bool wasDownLong = false;
-
-//         if (!wasDown && Buttons<Index>::isDown())
+//         if (DollHouse::Buttons<Index>::isDown())
 //         {
-//             wasDown = true;
-//             Serial.print("Button ");
-//             Serial.print(Index);
-//             Serial.print(" down short");
-//             Serial.println(".");
+//             Serial.print("0");
 //         }
-//         else if (!wasDownLong && Buttons<Index>::isDownLong())
+//         else
 //         {
-//             Serial.print("Button ");
-//             Serial.print(Index);
-//             Serial.print(" down long");
-//             Serial.println(".");
+//             Serial.print("1");
 //         }
-
-//         wasDown = Buttons<Index>::isDown();
-//         wasDownLong = Buttons<Index>::isDownLong();
 //     }
 // };
 
@@ -142,7 +129,7 @@ void setup()
     Helpers::TMP::Loop<DollHouse::numberOfButtons, DollHouse::WrapperInitialize>::impl();
 
     // Serial.begin(9600);
-    // Serial.println("Doll house v0.2");
+    // Serial.println("Doll house v0.9");
 
     buttonsInShiftRegister::initialize();
     buttonsInShiftRegister::enableClock();
@@ -198,10 +185,32 @@ void setup()
 
         Helpers::TMP::Loop<DollHouse::numberOfButtons, DollHouse::WrapperUpdate>::impl();
 
+        // Helpers::TMP::Loop<DollHouse::numberOfButtons, WrapperLogButton>::impl();
+        // Serial.println(".");
+
         for (size_t index = 0; index < DollHouse::numberOfButtons; ++index)
         {
             statemachines[index].process(dataTypes[index]);
+            // // For the following to work, you will have to remove the "private:" status
+            // // of currentState_ in Statemachine. Only do so temporarily!
+            // if (&DollHouse::stateBrightness == statemachines[index].currentState_)
+            // {
+            //     Serial.print("Brightness.");
+            // }
+            // else if (&DollHouse::stateHue == statemachines[index].currentState_)
+            // {
+            //     Serial.print("Hue.");
+            // }
+            // else if (&DollHouse::stateOn == statemachines[index].currentState_)
+            // {
+            //     Serial.print("On.");
+            // }
+            // else if (&DollHouse::stateOff == statemachines[index].currentState_)
+            // {
+            //     Serial.print("Off.");
+            // }
         }
+        // Serial.println("");
 
         if (updateDisplay)
         {
