@@ -259,11 +259,13 @@ void setup()
 
         delay(50); // idle for 50ms
     }
+
+    // Notify error - one should never leave the while-loop above.
+    ledsStrip.setPixelColor(0, /*red*/ 255, /*green*/ 0, /*blue*/ 0);
+    ledsStrip.show();
 }
 
 void loop()
 {
-    // Notify error
-    // initialize digital pin LED_BUILTIN as an output.
-    // pinMode(LED_BUILTIN, OUTPUT);
+    // intentionally empty
 }
