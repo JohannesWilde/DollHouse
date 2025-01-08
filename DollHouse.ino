@@ -1,7 +1,13 @@
 #include "dollHouseButtons.hpp"
 #include "dollHouseStatemachine.hpp"
 
+#if defined(_AVR_IOTNX4_H_)
 #include "ArduinoDrivers/attinyX4.hpp"
+#elif defined(_AVR_IOM328P_H_)
+#include "ArduinoDrivers/arduinoUno.hpp"
+#else
+#error "Unsupported board selected."
+#endif
 #include "ArduinoDrivers/dummytypes.hpp"
 
 #include "ArduinoDrivers/parallelinshiftregister74hc165.hpp"
@@ -13,7 +19,12 @@
 #include "helpers/crc16.hpp"
 #include "helpers/tmpLoop.hpp"
 
+#ifdef _AVR_IOTNX4_H_
+// Attiny84 with port A-pin requires a specially modified NeoPixel-library.
 #include <Adafruit_NeoPixel_PortA.h>
+#else
+#include <Adafruit_NeoPixel.h>
+#endif
 
 #include <avr/eeprom.h>
 #include <avr/interrupt.h>
@@ -45,15 +56,32 @@ uint8_t constexpr shiftRegisterBitsCount = 8;
 static_assert(shiftRegisterBitsCount >= DollHouse::numberOfButtons);
 
 typedef ParallelInShiftRegister74HC165<shiftRegisterBitsCount,
+#if defined(_AVR_IOTNX4_H_)
                                        ATtinyX4::pinB0,
                                        ATtinyX4::pinB1,
                                        DummyAvrPin1,
                                        ATtinyX4::pinB2,
+#elif defined(_AVR_IOM328P_H_)
+                                       ArduinoUno::A3,
+                                       ArduinoUno::A2,
+                                       DummyAvrPin1,
+                                       ArduinoUno::A4,
+#else
+    // Not supported yet.
+#endif
                                        DummyAvrPin1,
                                        DummyAvrPin1> buttonsInShiftRegister;
 
+int constexpr pinLedsStrip =
+#if defined(_AVR_IOTNX4_H_)
+        ATtinyX4::pinA0::pinNumber
+#elif defined(_AVR_IOM328P_H_)
+        ArduinoUno::D6::pinNumber
+#else
+    // Not supported yet.
+#endif
+    ;
 
-int constexpr pinLedsStrip = ATtinyX4::pinA0::pinNumber;
 uint16_t constexpr ledsCount = 9;
 static Adafruit_NeoPixel ledsStrip(ledsCount, pinLedsStrip, NEO_GRBW + NEO_KHZ800);
 
