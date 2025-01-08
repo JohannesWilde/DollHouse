@@ -8,7 +8,6 @@ namespace Colors
 
 struct ColorCustomFixed
 {
-    // All values are supposed to be in the range [0., 1.].
     uint16_t hue;
     uint8_t brightness;
 
