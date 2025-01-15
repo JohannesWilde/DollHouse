@@ -69,42 +69,5 @@ CustomButtomTimedMultiple buttonsTimedMultiple[] = {
     CustomButtomTimedMultiple(7),
 };
 
-
-bool buttonIsDoubleDownShortFinished(size_t const index)
-{
-    if (numberOfButtons > index)
-    {
-        return buttonsTimedMultiple[index].isDoubleDownShortFinished();
-    }
-    else
-    {
-        return false;
-    }
-}
-
-bool buttonIsSingleDownShortFinished(size_t const index)
-{
-    if (numberOfButtons > index)
-    {
-        return buttonsTimedMultiple[index].isSingleDownShortFinished();
-    }
-    else
-    {
-        return false;
-    }
-}
-
-bool buttonIsDownLong(size_t const index)
-{
-    if (numberOfButtons > index)
-    {
-        return buttonsTimedMultiple[index].isDownLong();
-    }
-    else
-    {
-        return false;
-    }
-}
-
 } // namespace DollHouse
 

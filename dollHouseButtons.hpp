@@ -50,15 +50,6 @@ typedef ButtonTimedMultiple<CustomButton, durationShort, durationLong, durationC
 
 extern CustomButtomTimedMultiple buttonsTimedMultiple[numberOfButtons];
 
-
-// Wrappers for run-time loops.
-
-bool buttonIsDoubleDownShortFinished(size_t const index);
-
-bool buttonIsSingleDownShortFinished(size_t const index);
-
-bool buttonIsDownLong(size_t const index);
-
 } // namespace DollHouse
 
 #endif // DOLL_HOUSE_BUTTONS_HPP
