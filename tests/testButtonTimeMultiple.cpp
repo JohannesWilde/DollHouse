@@ -5,8 +5,6 @@
 #include <ArduinoDrivers/buttonTimedMultiple.hpp>
 #include <ArduinoDrivers/simplePinBit.hpp>
 
-#include <ArduinoDrivers/deprecated/buttonTimedMultiple.hpp>
-
 #include <cassert>
 #include <cstdint>
 #include <iostream>
@@ -183,6 +181,14 @@ int main(int argc, char* argv[])
     buttonTimedMultiple0.update();
     assert(!buttonTimedMultiple0.isDoubleDownShortFinished());
     assert(!buttonTimedMultiple0.isSingleDownShortFinished());
+
+
+    // check iterability
+    bool anyButtonIsDown = false;
+    for (CustomButtomTimedMultiple const & buttonTimedMultiple : {buttonTimedMultiple0, buttonTimedMultiple1})
+    {
+        anyButtonIsDown |= buttonTimedMultiple.isDown();
+    }
 
 
     std::cout << "The End." << std::endl;
