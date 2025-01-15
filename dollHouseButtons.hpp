@@ -2,7 +2,7 @@
 #define DOLL_HOUSE_BUTTONS_HPP
 
 #include "ArduinoDrivers/button.hpp"
-#include "ArduinoDrivers/buttonTimedMultiple.hpp"
+#include "ArduinoDrivers/deprecated/buttonTimedMultiple.hpp"
 #include "ArduinoDrivers/simplePinBit.hpp"
 
 namespace DollHouse
@@ -10,10 +10,10 @@ namespace DollHouse
 
 constexpr SimplePin::State downState = SimplePin::State::Zero;
 constexpr SimplePin::State upState = SimplePin::State::One;
-constexpr ButtonTimedProperties::Duration_t durationShort = 2; // 50ms per cycle
-constexpr ButtonTimedProperties::Duration_t durationLong = 8;
-constexpr ButtonTimedProperties::Duration_t durationCombineMax = 6;
-constexpr ButtonTimedProperties::Duration_t durationStateTimeout = 100;
+constexpr TMP::ButtonTimedProperties::Duration_t durationShort = 2; // 50ms per cycle
+constexpr TMP::ButtonTimedProperties::Duration_t durationLong = 8;
+constexpr TMP::ButtonTimedProperties::Duration_t durationCombineMax = 6;
+constexpr TMP::ButtonTimedProperties::Duration_t durationStateTimeout = 100;
 
 extern uint8_t buttonsMemory[1];
 
@@ -38,14 +38,14 @@ typedef Button<Pin5, downState> Button5;
 typedef Button<Pin6, downState> Button6;
 typedef Button<Pin7, downState> Button7;
 
-typedef ButtonTimedMultiple<Button0, durationShort, durationLong, durationCombineMax> ButtonTimedMultiple0;
-typedef ButtonTimedMultiple<Button1, durationShort, durationLong, durationCombineMax> ButtonTimedMultiple1;
-typedef ButtonTimedMultiple<Button2, durationShort, durationLong, durationCombineMax> ButtonTimedMultiple2;
-typedef ButtonTimedMultiple<Button3, durationShort, durationLong, durationCombineMax> ButtonTimedMultiple3;
-typedef ButtonTimedMultiple<Button4, durationShort, durationLong, durationCombineMax> ButtonTimedMultiple4;
-typedef ButtonTimedMultiple<Button5, durationShort, durationLong, durationCombineMax> ButtonTimedMultiple5;
-typedef ButtonTimedMultiple<Button6, durationShort, durationLong, durationCombineMax> ButtonTimedMultiple6;
-typedef ButtonTimedMultiple<Button7, durationShort, durationLong, durationCombineMax> ButtonTimedMultiple7;
+typedef TMP::ButtonTimedMultiple<Button0, durationShort, durationLong, durationCombineMax> ButtonTimedMultiple0;
+typedef TMP::ButtonTimedMultiple<Button1, durationShort, durationLong, durationCombineMax> ButtonTimedMultiple1;
+typedef TMP::ButtonTimedMultiple<Button2, durationShort, durationLong, durationCombineMax> ButtonTimedMultiple2;
+typedef TMP::ButtonTimedMultiple<Button3, durationShort, durationLong, durationCombineMax> ButtonTimedMultiple3;
+typedef TMP::ButtonTimedMultiple<Button4, durationShort, durationLong, durationCombineMax> ButtonTimedMultiple4;
+typedef TMP::ButtonTimedMultiple<Button5, durationShort, durationLong, durationCombineMax> ButtonTimedMultiple5;
+typedef TMP::ButtonTimedMultiple<Button6, durationShort, durationLong, durationCombineMax> ButtonTimedMultiple6;
+typedef TMP::ButtonTimedMultiple<Button7, durationShort, durationLong, durationCombineMax> ButtonTimedMultiple7;
 
 template <uint8_t index>
 class Buttons;

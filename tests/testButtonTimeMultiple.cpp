@@ -1,8 +1,8 @@
 
 #include <ArduinoDrivers/button.hpp>
-#include <ArduinoDrivers/buttonTimed.hpp>
-#include <ArduinoDrivers/buttonTimedMultiple.hpp>
 #include <ArduinoDrivers/simplePinBit.hpp>
+#include <ArduinoDrivers/deprecated/buttonTimed.hpp>
+#include <ArduinoDrivers/deprecated/buttonTimedMultiple.hpp>
 
 #include <cassert>
 #include <cstdint>
@@ -11,9 +11,9 @@
 
 static constexpr SimplePin::State downState = SimplePin::State::Zero;
 static constexpr SimplePin::State upState = SimplePin::State::One;
-static constexpr ButtonTimedProperties::Duration_t durationShort = 2; // 50ms per cycle
-static constexpr ButtonTimedProperties::Duration_t durationLong = 8;
-static constexpr ButtonTimedProperties::Duration_t durationCombineMax = 6;
+static constexpr TMP::ButtonTimedProperties::Duration_t durationShort = 2; // 50ms per cycle
+static constexpr TMP::ButtonTimedProperties::Duration_t durationLong = 8;
+static constexpr TMP::ButtonTimedProperties::Duration_t durationCombineMax = 6;
 
 static uint8_t buttonsMemory[1];
 
@@ -23,8 +23,8 @@ typedef SimplePinBit<1, buttonsMemory> pin1;
 typedef Button<pin0, downState> button0;
 typedef Button<pin1, downState> button1;
 
-typedef ButtonTimedMultiple<button0, durationShort, durationLong, durationCombineMax> buttonTimedMultiple0;
-typedef ButtonTimedMultiple<button0, durationShort, durationLong, durationCombineMax> buttonTimedMultiple1;
+typedef TMP::ButtonTimedMultiple<button0, durationShort, durationLong, durationCombineMax> buttonTimedMultiple0;
+typedef TMP::ButtonTimedMultiple<button0, durationShort, durationLong, durationCombineMax> buttonTimedMultiple1;
 
 int main(int argc, char* argv[])
 {
