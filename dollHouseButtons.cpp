@@ -5,157 +5,105 @@ namespace DollHouse
 
 uint8_t buttonsMemory[1] = {0, };
 
-bool buttonIsDoubleDownShortFinished(size_t const index)
+
+void buttonInitialize(uint8_t const index)
 {
-    // TMP -> runtime translator.
-    bool result = false;
     switch (index)
     {
-    case 0:
+    case 0: return Button0::initialize();
+    case 1: return Button1::initialize();
+    case 2: return Button2::initialize();
+    case 3: return Button3::initialize();
+    case 4: return Button4::initialize();
+    case 5: return Button5::initialize();
+    case 6: return Button6::initialize();
+    case 7: return Button7::initialize();
+    }
+    // assert(numberOfButtons > index);
+    static_assert(8 == numberOfButtons, "buttonInitialize assumes different amount of buttons.");
+}
+
+void buttonDeinitialize(uint8_t const index)
+{
+    switch (index)
     {
-        result = DollHouse::Buttons<0>::isDoubleDownShortFinished();
-        break;
+    case 0: return Button0::deinitialize();
+    case 1: return Button1::deinitialize();
+    case 2: return Button2::deinitialize();
+    case 3: return Button3::deinitialize();
+    case 4: return Button4::deinitialize();
+    case 5: return Button5::deinitialize();
+    case 6: return Button6::deinitialize();
+    case 7: return Button7::deinitialize();
     }
-    case 1:
+    // assert(numberOfButtons > index);
+    static_assert(8 == numberOfButtons, "buttonDeinitialize assumes different amount of buttons.");
+}
+
+bool buttonIsDown(uint8_t const index)
+{
+    switch (index)
     {
-        result = DollHouse::Buttons<1>::isDoubleDownShortFinished();
-        break;
+    case 0: return Button0::isDown();
+    case 1: return Button1::isDown();
+    case 2: return Button2::isDown();
+    case 3: return Button3::isDown();
+    case 4: return Button4::isDown();
+    case 5: return Button5::isDown();
+    case 6: return Button6::isDown();
+    case 7: return Button7::isDown();
     }
-    case 2:
+    // assert(numberOfButtons > index);
+    static_assert(8 == numberOfButtons, "buttonIsDown assumes different amount of buttons.");
+    return false;
+}
+
+CustomButtomTimedMultiple buttonsTimedMultiple[] = {
+    CustomButtomTimedMultiple(0),
+    CustomButtomTimedMultiple(1),
+    CustomButtomTimedMultiple(2),
+    CustomButtomTimedMultiple(3),
+    CustomButtomTimedMultiple(4),
+    CustomButtomTimedMultiple(5),
+    CustomButtomTimedMultiple(6),
+    CustomButtomTimedMultiple(7),
+};
+
+
+bool buttonIsDoubleDownShortFinished(size_t const index)
+{
+    if (numberOfButtons > index)
     {
-        result = DollHouse::Buttons<2>::isDoubleDownShortFinished();
-        break;
+        return buttonsTimedMultiple[index].isDoubleDownShortFinished();
     }
-    case 3:
+    else
     {
-        result = DollHouse::Buttons<3>::isDoubleDownShortFinished();
-        break;
+        return false;
     }
-    case 4:
-    {
-        result = DollHouse::Buttons<4>::isDoubleDownShortFinished();
-        break;
-    }
-    case 5:
-    {
-        result = DollHouse::Buttons<5>::isDoubleDownShortFinished();
-        break;
-    }
-    case 6:
-    {
-        result = DollHouse::Buttons<6>::isDoubleDownShortFinished();
-        break;
-    }
-    case 7:
-    {
-        result = DollHouse::Buttons<7>::isDoubleDownShortFinished();
-        break;
-    }
-    }
-    static_assert(8 == DollHouse::numberOfButtons);
-    return result;
 }
 
 bool buttonIsSingleDownShortFinished(size_t const index)
 {
-    // TMP -> runtime translator.
-    bool result = false;
-    switch (index)
+    if (numberOfButtons > index)
     {
-    case 0:
+        return buttonsTimedMultiple[index].isSingleDownShortFinished();
+    }
+    else
     {
-        result = DollHouse::Buttons<0>::isSingleDownShortFinished();
-        break;
+        return false;
     }
-    case 1:
-    {
-        result = DollHouse::Buttons<1>::isSingleDownShortFinished();
-        break;
-    }
-    case 2:
-    {
-        result = DollHouse::Buttons<2>::isSingleDownShortFinished();
-        break;
-    }
-    case 3:
-    {
-        result = DollHouse::Buttons<3>::isSingleDownShortFinished();
-        break;
-    }
-    case 4:
-    {
-        result = DollHouse::Buttons<4>::isSingleDownShortFinished();
-        break;
-    }
-    case 5:
-    {
-        result = DollHouse::Buttons<5>::isSingleDownShortFinished();
-        break;
-    }
-    case 6:
-    {
-        result = DollHouse::Buttons<6>::isSingleDownShortFinished();
-        break;
-    }
-    case 7:
-    {
-        result = DollHouse::Buttons<7>::isSingleDownShortFinished();
-        break;
-    }
-    }
-    static_assert(8 == DollHouse::numberOfButtons);
-    return result;
 }
 
 bool buttonIsDownLong(size_t const index)
 {
-    // TMP -> runtime translator.
-    bool result = false;
-    switch (index)
+    if (numberOfButtons > index)
     {
-    case 0:
+        return buttonsTimedMultiple[index].isDownLong();
+    }
+    else
     {
-        result = DollHouse::Buttons<0>::isDownLong();
-        break;
+        return false;
     }
-    case 1:
-    {
-        result = DollHouse::Buttons<1>::isDownLong();
-        break;
-    }
-    case 2:
-    {
-        result = DollHouse::Buttons<2>::isDownLong();
-        break;
-    }
-    case 3:
-    {
-        result = DollHouse::Buttons<3>::isDownLong();
-        break;
-    }
-    case 4:
-    {
-        result = DollHouse::Buttons<4>::isDownLong();
-        break;
-    }
-    case 5:
-    {
-        result = DollHouse::Buttons<5>::isDownLong();
-        break;
-    }
-    case 6:
-    {
-        result = DollHouse::Buttons<6>::isDownLong();
-        break;
-    }
-    case 7:
-    {
-        result = DollHouse::Buttons<7>::isDownLong();
-        break;
-    }
-    }
-    static_assert(8 == DollHouse::numberOfButtons);
-    return result;
 }
 
 } // namespace DollHouse

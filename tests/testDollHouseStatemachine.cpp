@@ -11,7 +11,6 @@ int main(int argc, char* argv[])
     // initialize
     static_assert(0 < sizeof(DollHouse::buttonsMemory));
     memset(DollHouse::buttonsMemory, 0, sizeof(DollHouse::buttonsMemory) / sizeof(DollHouse::buttonsMemory[0]));
-    Helpers::TMP::Loop<DollHouse::numberOfButtons, DollHouse::WrapperInitialize>::impl();
 
     // variables
     static Colors::ColorCustom settingsColors[DollHouse::numberOfButtons] = {};
@@ -50,7 +49,11 @@ int main(int argc, char* argv[])
     };
 
     // loop
-    Helpers::TMP::Loop<DollHouse::numberOfButtons, DollHouse::WrapperUpdate>::impl();
+
+    for (size_t index = 0; index < DollHouse::numberOfButtons; ++index)
+    {
+        DollHouse::buttonsTimedMultiple[index].update();
+    }
 
     for (size_t index = 0; index < DollHouse::numberOfButtons; ++index)
     {
@@ -70,10 +73,6 @@ int main(int argc, char* argv[])
     }
 
     assert(true);
-
-
-    // deinitialize
-    Helpers::TMP::Loop<DollHouse::numberOfButtons, DollHouse::WrapperDeinitialize>::impl();
 
     std::cout << "The End." << std::endl;
 }

@@ -16,7 +16,7 @@ static constexpr ButtonTimedProperties::Duration_t durationShort = 2; // 50ms pe
 static constexpr ButtonTimedProperties::Duration_t durationLong = 8;
 static constexpr ButtonTimedProperties::Duration_t durationCombineMax = 6;
 
-static uint8_t buttonsMemory[1];
+static uint8_t buttonsMemory[1] = {0, };
 
 typedef SimplePinBit<0, buttonsMemory> pin0;
 typedef SimplePinBit<1, buttonsMemory> pin1;

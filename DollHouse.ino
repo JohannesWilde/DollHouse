@@ -151,10 +151,6 @@ void setup()
     ledsStrip.show();            // Turn OFF all pixels ASAP
     // ledsStrip.setBrightness(Adafruit_NeoPixel::gamma8(255));
 
-    static_assert(0 < sizeof(DollHouse::buttonsMemory));
-    memset(DollHouse::buttonsMemory, 0, sizeof(DollHouse::buttonsMemory) / sizeof(DollHouse::buttonsMemory[0]));
-    Helpers::TMP::Loop<DollHouse::numberOfButtons, DollHouse::WrapperInitialize>::impl();
-
     // Serial.begin(9600);
     // Serial.println("Doll house v0.9");
 
@@ -207,7 +203,10 @@ void setup()
         // Actually copy the latched shift-register values to data.
         buttonsInShiftRegister::shiftOutBits(DollHouse::buttonsMemory);
 
-        Helpers::TMP::Loop<DollHouse::numberOfButtons, DollHouse::WrapperUpdate>::impl();
+        for (size_t index = 0; index < DollHouse::numberOfButtons; ++index)
+        {
+            DollHouse::buttonsTimedMultiple[index].update();
+        }
 
         // Helpers::TMP::Loop<DollHouse::numberOfButtons, WrapperLogButton>::impl();
         // Serial.println(".");
