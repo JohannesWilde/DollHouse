@@ -11,9 +11,9 @@
 
 static constexpr SimplePin::State downState = SimplePin::State::Zero;
 static constexpr SimplePin::State upState = SimplePin::State::One;
-static constexpr TMP::ButtonTimedProperties::Duration_t durationShort = 2; // 50ms per cycle
-static constexpr TMP::ButtonTimedProperties::Duration_t durationLong = 8;
-static constexpr TMP::ButtonTimedProperties::Duration_t durationCombineMax = 6;
+static constexpr ButtonTimedProperties::Duration_t durationShort = 2; // 50ms per cycle
+static constexpr ButtonTimedProperties::Duration_t durationLong = 8;
+static constexpr ButtonTimedProperties::Duration_t durationCombineMax = 6;
 
 static uint8_t buttonsMemory[1];
 

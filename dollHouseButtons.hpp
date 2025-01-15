@@ -10,10 +10,10 @@ namespace DollHouse
 
 constexpr SimplePin::State downState = SimplePin::State::Zero;
 constexpr SimplePin::State upState = SimplePin::State::One;
-constexpr TMP::ButtonTimedProperties::Duration_t durationShort = 2; // 50ms per cycle
-constexpr TMP::ButtonTimedProperties::Duration_t durationLong = 8;
-constexpr TMP::ButtonTimedProperties::Duration_t durationCombineMax = 6;
-constexpr TMP::ButtonTimedProperties::Duration_t durationStateTimeout = 100;
+constexpr ButtonTimedProperties::Duration_t durationShort = 2; // 50ms per cycle
+constexpr ButtonTimedProperties::Duration_t durationLong = 8;
+constexpr ButtonTimedProperties::Duration_t durationCombineMax = 6;
+constexpr ButtonTimedProperties::Duration_t durationStateTimeout = 100;
 
 extern uint8_t buttonsMemory[1];
 
