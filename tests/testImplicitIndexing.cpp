@@ -61,6 +61,38 @@ size_t getMyIndexBaseClassIndex(void const * const instance)
 
 // -----
 
+template<size_t (*getIndex_)(void const *)>
+class IndexBasedClassEmpty
+{
+public:
+    IndexBasedClassEmpty()
+    {
+        // intentionally empty
+    }
+
+    size_t getIndex() const
+    {
+        return getIndex_(this);
+    }
+};
+
+size_t getMyIndexBaseClassEmptyIndex(void const *);
+
+typedef IndexBasedClassEmpty<getMyIndexBaseClassEmptyIndex> MyIndexBaseClassEmpty;
+
+static MyIndexBaseClassEmpty myEmptyInstances[3] = {
+    {},
+    {},
+    {},
+};
+
+size_t getMyIndexBaseClassEmptyIndex(void const * const instance)
+{
+    return static_cast<MyIndexBaseClassEmpty const *>(instance) - myEmptyInstances;
+}
+
+// -----
+
 int main(int argc, char* argv[])
 {
     for (TestDatum const & datum : testData)
@@ -74,6 +106,12 @@ int main(int argc, char* argv[])
         size_t const index = myInstance.getIndex();
         uint8_t const value = myInstance.getValue();
         std::cout << index << ": " << static_cast<unsigned>(value) << std::endl;
+    }
+
+    for (MyIndexBaseClassEmpty const & myEmptyInstance : myEmptyInstances)
+    {
+        size_t const index = myEmptyInstance.getIndex();
+        std::cout << "index: " << index << std::endl;
     }
 
     std::cout << "testImplicitIndexing succeeded." << std::endl;
