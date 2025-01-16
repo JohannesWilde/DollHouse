@@ -114,5 +114,8 @@ int main(int argc, char* argv[])
         std::cout << "index: " << index << std::endl;
     }
 
+    std::cout << "sizeof(MyIndexBaseClassEmpty): " << sizeof(MyIndexBaseClassEmpty) << std::endl;
+    std::cout << "sizeof(MyIndexBaseClass): " << sizeof(MyIndexBaseClass) << std::endl;
+
     std::cout << "testImplicitIndexing succeeded." << std::endl;
 }
