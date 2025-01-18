@@ -50,9 +50,9 @@ int main(int argc, char* argv[])
 
     // loop
 
-    for (size_t index = 0; index < DollHouse::numberOfButtons; ++index)
+    for (DollHouse::CustomButtomTimedMultiple & button : DollHouse::buttonsTimedMultiple)
     {
-        DollHouse::buttonsTimedMultiple[index].update();
+        button.update();
     }
 
     for (size_t index = 0; index < DollHouse::numberOfButtons; ++index)

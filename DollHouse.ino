@@ -203,9 +203,9 @@ void setup()
         // Actually copy the latched shift-register values to data.
         buttonsInShiftRegister::shiftOutBits(DollHouse::buttonsMemory);
 
-        for (size_t index = 0; index < DollHouse::numberOfButtons; ++index)
+        for (DollHouse::CustomButtomTimedMultiple & button : DollHouse::buttonsTimedMultiple)
         {
-            DollHouse::buttonsTimedMultiple[index].update();
+            button.update();
         }
 
         // Helpers::TMP::Loop<DollHouse::numberOfButtons, WrapperLogButton>::impl();
