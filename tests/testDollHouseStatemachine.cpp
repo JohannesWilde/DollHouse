@@ -25,29 +25,6 @@ int main(int argc, char* argv[])
         settingsColors[index] = Colors::ColorCustom(1.0, 1.0);
     }
 
-    // statemachine
-    DollHouse::DataType dataTypes[DollHouse::numberOfButtons] = {
-        {1, 0, },
-        {2, 1, },
-        {3, 2, },
-        {4, 3, },
-        {5, 4, },
-        {6, 5, },
-        {7, 6, },
-        {8, 7, },
-    };
-
-    Helpers::Statemachine<DollHouse::DataType> statemachines[DollHouse::numberOfButtons] = {
-        Helpers::Statemachine(DollHouse::stateOff),
-        Helpers::Statemachine(DollHouse::stateOff),
-        Helpers::Statemachine(DollHouse::stateOff),
-        Helpers::Statemachine(DollHouse::stateOff),
-        Helpers::Statemachine(DollHouse::stateOff),
-        Helpers::Statemachine(DollHouse::stateOff),
-        Helpers::Statemachine(DollHouse::stateOff),
-        Helpers::Statemachine(DollHouse::stateOff),
-    };
-
     // loop
 
     for (DollHouse::CustomButtomTimedMultiple & button : DollHouse::buttonsTimedMultiple)
@@ -57,7 +34,7 @@ int main(int argc, char* argv[])
 
     for (size_t index = 0; index < DollHouse::numberOfButtons; ++index)
     {
-        statemachines[index].process(dataTypes[index]);
+        DollHouse::statemachines[index].process(DollHouse::dataTypes[index]);
     }
 
     if (saveSettings)

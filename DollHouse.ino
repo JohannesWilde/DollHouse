@@ -143,6 +143,29 @@ bool readWithCrc(void * const data, size_t const byteCount, Address const eeprom
 } // namespace Eeprom
 
 
+// statemachine
+static DollHouse::DataType dataTypes[DollHouse::numberOfButtons] = {
+    {1, 0, },
+    {2, 1, },
+    {3, 2, },
+    {4, 3, },
+    {5, 4, },
+    {6, 5, },
+    {7, 6, },
+    {8, 7, },
+    };
+
+static Helpers::Statemachine<DollHouse::DataType> statemachines[DollHouse::numberOfButtons] = {
+    Helpers::Statemachine(DollHouse::stateOff),
+    Helpers::Statemachine(DollHouse::stateOff),
+    Helpers::Statemachine(DollHouse::stateOff),
+    Helpers::Statemachine(DollHouse::stateOff),
+    Helpers::Statemachine(DollHouse::stateOff),
+    Helpers::Statemachine(DollHouse::stateOff),
+    Helpers::Statemachine(DollHouse::stateOff),
+    Helpers::Statemachine(DollHouse::stateOff),
+};
+
 
 void setup()
 {
@@ -171,29 +194,6 @@ void setup()
 
     // Show power-up on Status LED.
     DollHouse::displayColors[0] = Colors::ColorCustomFixed(65536/7*4+500, 12);
-
-    // statemachine
-     DollHouse::DataType dataTypes[DollHouse::numberOfButtons] = {
-        {1, 0, },
-        {2, 1, },
-        {3, 2, },
-        {4, 3, },
-        {5, 4, },
-        {6, 5, },
-        {7, 6, },
-        {8, 7, },
-        };
-
-    Helpers::Statemachine<DollHouse::DataType> statemachines[DollHouse::numberOfButtons] = {
-        Helpers::Statemachine(DollHouse::stateOff),
-        Helpers::Statemachine(DollHouse::stateOff),
-        Helpers::Statemachine(DollHouse::stateOff),
-        Helpers::Statemachine(DollHouse::stateOff),
-        Helpers::Statemachine(DollHouse::stateOff),
-        Helpers::Statemachine(DollHouse::stateOff),
-        Helpers::Statemachine(DollHouse::stateOff),
-        Helpers::Statemachine(DollHouse::stateOff),
-    };
 
     // loop
     while (true)

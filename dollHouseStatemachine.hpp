@@ -1,6 +1,8 @@
 #ifndef DOLL_HOUSE_STATEMACHINE_HPP
 #define DOLL_HOUSE_STATEMACHINE_HPP
 
+#include "dollHouseButtons.hpp"
+
 #include "ArduinoDrivers/buttonTimed.hpp"
 
 #include "colors/colorCustomFixed.hpp"
@@ -13,16 +15,9 @@
 namespace DollHouse
 {
 
-uint8_t constexpr ledsCount = 9; // todo: move to config-header
-
-extern Colors::ColorCustomFixed settingsColors[ledsCount];
-extern bool saveSettings;
-extern Colors::ColorCustomFixed displayColors[ledsCount];
-extern bool updateDisplay;
-
 struct DataType
 {
-    uint8_t const ledIndex;
+    uint8_t const ledIndex; // todo: remove indices?
     uint8_t const buttonIndex;
     bool incrementBrightness = false;
     ButtonTimedProperties::Duration_t stateTimeout = 0;
@@ -64,6 +59,16 @@ class StateHue : public Helpers::AbstractState<DataType>
 
 extern StateHue const stateHue;
 
+
+uint8_t constexpr ledsCount = 9; // todo: move to config-header
+
+extern Colors::ColorCustomFixed settingsColors[ledsCount];
+extern bool saveSettings;
+extern Colors::ColorCustomFixed displayColors[ledsCount];
+extern bool updateDisplay;
+
+extern DataType dataTypes[DollHouse::numberOfButtons];
+extern Helpers::Statemachine<DollHouse::DataType> statemachines[DollHouse::numberOfButtons];
 
 } // namespace DollHouse
 
