@@ -17,16 +17,17 @@ bool saveSettings = false;
 Colors::ColorCustomFixed displayColors[ledsCount] = {};
 bool updateDisplay = false;
 
-DataType dataTypes[numberOfButtons] = {
-    {1, 0, },
-    {2, 1, },
-    {3, 2, },
-    {4, 3, },
-    {5, 4, },
-    {6, 5, },
-    {7, 6, },
-    {8, 7, },
-    };
+DataType dataTypes[numberOfButtons] = {};
+
+constexpr size_t getLedIndex(DataType const * const data)
+{
+    return 1 + (data - dataTypes);
+}
+
+constexpr size_t getButtonIndex(DataType const * const data)
+{
+    return (data - dataTypes);
+}
 
 Helpers::Statemachine<DataType> statemachines[numberOfButtons] = {
     Helpers::Statemachine(stateOff),
@@ -42,14 +43,14 @@ Helpers::Statemachine<DataType> statemachines[numberOfButtons] = {
 
 void StateOff::init(DataType & data) const
 {
-    displayColors[data.ledIndex] = Colors::ColorCustomFixed(0, 0);
+    displayColors[getLedIndex(&data)] = Colors::ColorCustomFixed(0, 0);
     updateDisplay = true;
 }
 
 Helpers::AbstractState<DataType> const & StateOff::process(DataType & data) const
 {
     Helpers::AbstractState<DataType> const * nextState = this;
-    if (buttonsTimedMultiple[data.buttonIndex].isSingleDownShortFinished())
+    if (buttonsTimedMultiple[getButtonIndex(&data)].isSingleDownShortFinished())
     {
         nextState = &stateOn;
     }
@@ -68,22 +69,22 @@ void StateOff::deinit(DataType & data) const
 
 void StateOn::init(DataType & data) const
 {
-    displayColors[data.ledIndex] = settingsColors[data.ledIndex];
+    displayColors[getLedIndex(&data)] = settingsColors[getLedIndex(&data)];
     updateDisplay = true;
 }
 
 Helpers::AbstractState<DataType> const & StateOn::process(DataType & data) const
 {
     Helpers::AbstractState<DataType> const * nextState = this;
-    if (buttonsTimedMultiple[data.buttonIndex].isSingleDownShortFinished())
+    if (buttonsTimedMultiple[getButtonIndex(&data)].isSingleDownShortFinished())
     {
         nextState = &stateOff;
     }
-    else if (buttonsTimedMultiple[data.buttonIndex].isDownLong())
+    else if (buttonsTimedMultiple[getButtonIndex(&data)].isDownLong())
     {
         nextState = &stateBrightness;
     }
-    else if (buttonsTimedMultiple[data.buttonIndex].isDoubleDownShortFinished())
+    else if (buttonsTimedMultiple[getButtonIndex(&data)].isDoubleDownShortFinished())
     {
         nextState = &stateHue;
     }
@@ -109,7 +110,7 @@ void StateBrightness::init(DataType & data) const
 Helpers::AbstractState<DataType> const & StateBrightness::process(DataType & data) const
 {
     Helpers::AbstractState<DataType> const * nextState = this;
-    if (buttonsTimedMultiple[data.buttonIndex].isDownLong())
+    if (buttonsTimedMultiple[getButtonIndex(&data)].isDownLong())
     {
         // As long as button stays down, modify brightness.
         static constexpr uint8_t brightnessStepSingle = 1;
@@ -117,21 +118,21 @@ Helpers::AbstractState<DataType> const & StateBrightness::process(DataType & dat
         static constexpr uint8_t brightnessMin = 2 * brightnessStepSingle;
         if (data.incrementBrightness)
         {
-            if ((255 - brightnessStep) >= displayColors[data.ledIndex].brightness)
+            if ((255 - brightnessStep) >= displayColors[getLedIndex(&data)].brightness)
             {
-                displayColors[data.ledIndex].brightness += brightnessStep;
+                displayColors[getLedIndex(&data)].brightness += brightnessStep;
             }
         }
         else
         {
-            if (brightnessStep <= displayColors[data.ledIndex].brightness)
+            if (brightnessStep <= displayColors[getLedIndex(&data)].brightness)
             {
-                displayColors[data.ledIndex].brightness -= brightnessStep;
+                displayColors[getLedIndex(&data)].brightness -= brightnessStep;
             }
             // Prevent on and off state being indistinguishable.
-            if (brightnessMin > displayColors[data.ledIndex].brightness)
+            if (brightnessMin > displayColors[getLedIndex(&data)].brightness)
             {
-                displayColors[data.ledIndex].brightness = brightnessMin;
+                displayColors[getLedIndex(&data)].brightness = brightnessMin;
             }
         }
         updateDisplay = true;
@@ -146,7 +147,7 @@ Helpers::AbstractState<DataType> const & StateBrightness::process(DataType & dat
 
 void StateBrightness::deinit(DataType & data) const
 {
-    settingsColors[data.ledIndex].brightness = displayColors[data.ledIndex].brightness;
+    settingsColors[getLedIndex(&data)].brightness = displayColors[getLedIndex(&data)].brightness;
     saveSettings = true;
 }
 
@@ -159,25 +160,25 @@ void StateHue::init(DataType & data) const
 Helpers::AbstractState<DataType> const & StateHue::process(DataType & data) const
 {
     Helpers::AbstractState<DataType> const * nextState = this;
-    if (buttonsTimedMultiple[data.buttonIndex].isSingleDownShortFinished())
+    if (buttonsTimedMultiple[getButtonIndex(&data)].isSingleDownShortFinished())
     {
         // Change to next major hue.
-        displayColors[data.ledIndex].hue = Colors::SevenSegmentRgb::nextMajorHue(displayColors[data.ledIndex].hue);
+        displayColors[getLedIndex(&data)].hue = Colors::SevenSegmentRgb::nextMajorHue(displayColors[getLedIndex(&data)].hue);
 
         updateDisplay = true;
         // Reset timeout while the user still interacts with this state.
         data.stateTimeout = DollHouse::durationStateTimeout;
     }
-    else if (buttonsTimedMultiple[data.buttonIndex].isDownLong())
+    else if (buttonsTimedMultiple[getButtonIndex(&data)].isDownLong())
     {
         // Change hue continuously.
-        displayColors[data.ledIndex].hue += 5 * Colors::SevenSegmentRgb::singleDeltaHueUint16();
+        displayColors[getLedIndex(&data)].hue += 5 * Colors::SevenSegmentRgb::singleDeltaHueUint16();
 
         updateDisplay = true;
         // Reset timeout while the user still interacts with this state.
         data.stateTimeout = DollHouse::durationStateTimeout;
     }
-    else if ((0 == data.stateTimeout) || buttonsTimedMultiple[data.buttonIndex].isDoubleDownShortFinished())
+    else if ((0 == data.stateTimeout) || buttonsTimedMultiple[getButtonIndex(&data)].isDoubleDownShortFinished())
     {
         nextState = &stateOn;
     }
@@ -190,7 +191,7 @@ Helpers::AbstractState<DataType> const & StateHue::process(DataType & data) cons
 
 void StateHue::deinit(DataType & data) const
 {
-    settingsColors[data.ledIndex] = displayColors[data.ledIndex];
+    settingsColors[getLedIndex(&data)] = displayColors[getLedIndex(&data)];
     saveSettings = true;
 }
 

@@ -143,30 +143,6 @@ bool readWithCrc(void * const data, size_t const byteCount, Address const eeprom
 } // namespace Eeprom
 
 
-// statemachine
-static DollHouse::DataType dataTypes[DollHouse::numberOfButtons] = {
-    {1, 0, },
-    {2, 1, },
-    {3, 2, },
-    {4, 3, },
-    {5, 4, },
-    {6, 5, },
-    {7, 6, },
-    {8, 7, },
-    };
-
-static Helpers::Statemachine<DollHouse::DataType> statemachines[DollHouse::numberOfButtons] = {
-    Helpers::Statemachine(DollHouse::stateOff),
-    Helpers::Statemachine(DollHouse::stateOff),
-    Helpers::Statemachine(DollHouse::stateOff),
-    Helpers::Statemachine(DollHouse::stateOff),
-    Helpers::Statemachine(DollHouse::stateOff),
-    Helpers::Statemachine(DollHouse::stateOff),
-    Helpers::Statemachine(DollHouse::stateOff),
-    Helpers::Statemachine(DollHouse::stateOff),
-};
-
-
 void setup()
 {
     // initialize
@@ -213,7 +189,7 @@ void setup()
 
         for (size_t index = 0; index < DollHouse::numberOfButtons; ++index)
         {
-            statemachines[index].process(dataTypes[index]);
+            DollHouse::statemachines[index].process(DollHouse::dataTypes[index]);
             // // For the following to work, you will have to remove the "private:" status
             // // of currentState_ in Statemachine. Only do so temporarily!
             // if (&DollHouse::stateBrightness == statemachines[index].currentState_)

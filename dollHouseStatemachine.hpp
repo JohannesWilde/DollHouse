@@ -17,8 +17,6 @@ namespace DollHouse
 
 struct DataType
 {
-    uint8_t const ledIndex; // todo: remove indices?
-    uint8_t const buttonIndex;
     bool incrementBrightness = false;
     ButtonTimedProperties::Duration_t stateTimeout = 0;
 };
