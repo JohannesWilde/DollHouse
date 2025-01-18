@@ -25,42 +25,65 @@ typedef Button<pin0, downState> button0;
 typedef Button<pin1, downState> button1;
 
 
-static void buttonInitialize(uint8_t const index)
+static void buttonInitialize(void const * const instance);
+static void buttonDeinitialize(void const * const instance);
+static bool buttonIsDown(void const * const instance);
+
+typedef ButtonDynamic<&buttonInitialize, &buttonIsDown, &buttonDeinitialize> CustomButton;
+typedef ButtonTimedMultiple<CustomButton, durationShort, durationLong, durationCombineMax, 5> CustomButtomTimedMultiple;
+
+static CustomButtomTimedMultiple buttonTimedMultiple0;
+static CustomButtomTimedMultiple buttonTimedMultiple1;
+
+
+
+static void buttonInitialize(void const * const instance)
 {
-    switch (index)
+    if (static_cast<CustomButtomTimedMultiple const *>(instance) == &buttonTimedMultiple0)
     {
-    case 0: button0::initialize();
-    case 1: button1::initialize();
+        button0::initialize();
     }
-    assert(2 > index);
+    else if (static_cast<CustomButtomTimedMultiple const *>(instance) == &buttonTimedMultiple1)
+    {
+        button1::initialize();
+    }
+    else
+    {
+        assert(false);
+    }
 }
 
-static void buttonDeinitialize(uint8_t const index)
+static void buttonDeinitialize(void const * const instance)
 {
-    switch (index)
+    if (static_cast<CustomButtomTimedMultiple const *>(instance) == &buttonTimedMultiple0)
     {
-    case 0: button0::deinitialize();
-    case 1: button1::deinitialize();
+        button0::deinitialize();
     }
-    assert(2 > index);
+    else if (static_cast<CustomButtomTimedMultiple const *>(instance) == &buttonTimedMultiple1)
+    {
+        button1::deinitialize();
+    }
+    else
+    {
+        assert(false);
+    }
 }
 
-static bool buttonIsDown(uint8_t const index)
+static bool buttonIsDown(void const * const instance)
 {
-    switch (index)
+    if (static_cast<CustomButtomTimedMultiple const *>(instance) == &buttonTimedMultiple0)
     {
-    case 0: return button0::isDown();
-    case 1: return button1::isDown();
+        return button0::isDown();
     }
-    assert(2 > index);
-    return false;
+    else if (static_cast<CustomButtomTimedMultiple const *>(instance) == &buttonTimedMultiple1)
+    {
+        return button1::isDown();
+    }
+    else
+    {
+        assert(false);
+    }
 }
-
-typedef ButtonDynamic<uint8_t, &buttonInitialize, &buttonIsDown, &buttonDeinitialize> CustomButton;
-typedef ButtonTimedMultiple<CustomButton, durationShort, durationLong, durationCombineMax, 5, uint8_t> CustomButtomTimedMultiple;
-
-static CustomButtomTimedMultiple buttonTimedMultiple0(0);
-static CustomButtomTimedMultiple buttonTimedMultiple1(1);
 
 
 int main(int argc, char* argv[])
