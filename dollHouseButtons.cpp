@@ -5,10 +5,20 @@ namespace DollHouse
 
 uint8_t buttonsMemory[1] = {0, };
 
+CustomButtomTimedMultiple buttonsTimedMultiple[8] = {
+    CustomButtomTimedMultiple(),
+    CustomButtomTimedMultiple(),
+    CustomButtomTimedMultiple(),
+    CustomButtomTimedMultiple(),
+    CustomButtomTimedMultiple(),
+    CustomButtomTimedMultiple(),
+    CustomButtomTimedMultiple(),
+    CustomButtomTimedMultiple(),
+};
 
-void buttonInitialize(uint8_t const index)
+void buttonInitialize(void const * const instance)
 {
-    switch (index)
+    switch (static_cast<CustomButtomTimedMultiple const *>(instance) - buttonsTimedMultiple)
     {
     case 0: return Button0::initialize();
     case 1: return Button1::initialize();
@@ -23,9 +33,9 @@ void buttonInitialize(uint8_t const index)
     static_assert(8 == numberOfButtons, "buttonInitialize assumes different amount of buttons.");
 }
 
-void buttonDeinitialize(uint8_t const index)
+void buttonDeinitialize(void const * const instance)
 {
-    switch (index)
+    switch (static_cast<CustomButtomTimedMultiple const *>(instance) - buttonsTimedMultiple)
     {
     case 0: return Button0::deinitialize();
     case 1: return Button1::deinitialize();
@@ -40,9 +50,9 @@ void buttonDeinitialize(uint8_t const index)
     static_assert(8 == numberOfButtons, "buttonDeinitialize assumes different amount of buttons.");
 }
 
-bool buttonIsDown(uint8_t const index)
+bool buttonIsDown(void const * const instance)
 {
-    switch (index)
+    switch (static_cast<CustomButtomTimedMultiple const *>(instance) - buttonsTimedMultiple)
     {
     case 0: return Button0::isDown();
     case 1: return Button1::isDown();
@@ -57,17 +67,6 @@ bool buttonIsDown(uint8_t const index)
     static_assert(8 == numberOfButtons, "buttonIsDown assumes different amount of buttons.");
     return false;
 }
-
-CustomButtomTimedMultiple buttonsTimedMultiple[] = {
-    CustomButtomTimedMultiple(0),
-    CustomButtomTimedMultiple(1),
-    CustomButtomTimedMultiple(2),
-    CustomButtomTimedMultiple(3),
-    CustomButtomTimedMultiple(4),
-    CustomButtomTimedMultiple(5),
-    CustomButtomTimedMultiple(6),
-    CustomButtomTimedMultiple(7),
-};
 
 } // namespace DollHouse
 

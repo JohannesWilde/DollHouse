@@ -40,13 +40,13 @@ typedef Button<Pin6, downState> Button6;
 typedef Button<Pin7, downState> Button7;
 
 
-void buttonInitialize(uint8_t const index);
-void buttonDeinitialize(uint8_t const index);
-bool buttonIsDown(uint8_t const index);
+void buttonInitialize(void const * const instance);
+void buttonDeinitialize(void const * const instance);
+bool buttonIsDown(void const * const instance);
 
 
-typedef ButtonDynamic<uint8_t, &buttonInitialize, &buttonIsDown, &buttonDeinitialize> CustomButton;
-typedef ButtonTimedMultiple<CustomButton, durationShort, durationLong, durationCombineMax, 5, uint8_t> CustomButtomTimedMultiple;
+typedef ButtonDynamic<&buttonInitialize, &buttonIsDown, &buttonDeinitialize> CustomButton;
+typedef ButtonTimedMultiple<CustomButton, durationShort, durationLong, durationCombineMax, 5> CustomButtomTimedMultiple;
 
 extern CustomButtomTimedMultiple buttonsTimedMultiple[numberOfButtons];
 
