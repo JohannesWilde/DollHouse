@@ -1,7 +1,13 @@
 #include "dollHouseButtons.hpp"
 #include "dollHouseStatemachine.hpp"
 
-#include "ArduinoDrivers/ArduinoUno.hpp"
+#if defined(_AVR_IOTNX4_H_)
+#include "ArduinoDrivers/attinyX4.hpp"
+#elif defined(_AVR_IOM328P_H_)
+#include "ArduinoDrivers/arduinoUno.hpp"
+#else
+#error "Unsupported board selected."
+#endif
 #include "ArduinoDrivers/dummytypes.hpp"
 
 #include "ArduinoDrivers/parallelinshiftregister74hc165.hpp"
@@ -13,7 +19,12 @@
 #include "helpers/crc16.hpp"
 #include "helpers/tmpLoop.hpp"
 
+#ifdef _AVR_IOTNX4_H_
+// Attiny84 with port A-pin requires a specially modified NeoPixel-library.
+#include <Adafruit_NeoPixel_PortA.h>
+#else
 #include <Adafruit_NeoPixel.h>
+#endif
 
 #include <avr/eeprom.h>
 #include <avr/interrupt.h>
@@ -24,7 +35,6 @@
 
 #include <stdint.h>
 #include <string.h>
-
 
 
 // https://stackoverflow.com/questions/6938219/how-to-check-whether-all-bytes-in-a-memory-block-are-zero
@@ -46,16 +56,33 @@ uint8_t constexpr shiftRegisterBitsCount = 8;
 static_assert(shiftRegisterBitsCount >= DollHouse::numberOfButtons);
 
 typedef ParallelInShiftRegister74HC165<shiftRegisterBitsCount,
+#if defined(_AVR_IOTNX4_H_)
+                                       ATtinyX4::pinB0,
+                                       ATtinyX4::pinB1,
+                                       DummyAvrPin1,
+                                       ATtinyX4::pinB2,
+#elif defined(_AVR_IOM328P_H_)
                                        ArduinoUno::A3,
                                        ArduinoUno::A2,
                                        DummyAvrPin1,
                                        ArduinoUno::A4,
+#else
+    // Not supported yet.
+#endif
                                        DummyAvrPin1,
                                        DummyAvrPin1> buttonsInShiftRegister;
 
+int constexpr pinLedsStrip =
+#if defined(_AVR_IOTNX4_H_)
+        ATtinyX4::pinA0::pinNumber
+#elif defined(_AVR_IOM328P_H_)
+        ArduinoUno::D6::pinNumber
+#else
+    // Not supported yet.
+#endif
+    ;
 
-int constexpr pinLedsStrip = 6;
-uint16_t constexpr ledsCount = 12;
+uint16_t constexpr ledsCount = 9;
 static Adafruit_NeoPixel ledsStrip(ledsCount, pinLedsStrip, NEO_GRBW + NEO_KHZ800);
 
 
@@ -116,7 +143,6 @@ bool readWithCrc(void * const data, size_t const byteCount, Address const eeprom
 } // namespace Eeprom
 
 
-
 void setup()
 {
     // initialize
@@ -124,56 +150,26 @@ void setup()
     ledsStrip.show();            // Turn OFF all pixels ASAP
     // ledsStrip.setBrightness(Adafruit_NeoPixel::gamma8(255));
 
-    static_assert(0 < sizeof(DollHouse::buttonsMemory));
-    memset(DollHouse::buttonsMemory, 0, sizeof(DollHouse::buttonsMemory) / sizeof(DollHouse::buttonsMemory[0]));
-    Helpers::TMP::Loop<DollHouse::numberOfButtons, DollHouse::WrapperInitialize>::impl();
-
     // Serial.begin(9600);
     // Serial.println("Doll house v0.9");
 
     buttonsInShiftRegister::initialize();
     buttonsInShiftRegister::enableClock();
 
-    // variables
-    static Colors::ColorCustom settingsColors[DollHouse::numberOfButtons] = {};
-    static bool saveSettings = false;
-    static Colors::ColorCustom displayColors[DollHouse::numberOfButtons] = {};
-    static bool updateDisplay = true;
-
     // load settings from EEPROM
     // Load from Eeprom.
-    bool const readBack = Eeprom::readWithCrc(settingsColors, sizeof(settingsColors), Eeprom::Addresses::backupValues);
+    bool const readBack = Eeprom::readWithCrc(DollHouse::settingsColors, sizeof(DollHouse::settingsColors), Eeprom::Addresses::backupValues);
     if (!readBack)
     {
         // Default to full white explicitely.
         for (size_t index = 0; index < DollHouse::numberOfButtons; ++index)
         {
-            settingsColors[index] = Colors::ColorCustom(1.0, 1.0);
+            DollHouse::settingsColors[index] = Colors::ColorCustomFixed(0, 255);
         }
     }
 
-    // statemachine
-    DollHouse::DataType dataTypes[DollHouse::numberOfButtons] = {
-        {settingsColors[0], saveSettings, displayColors[0], updateDisplay, 0, },
-        {settingsColors[1], saveSettings, displayColors[1], updateDisplay, 1, },
-        {settingsColors[2], saveSettings, displayColors[2], updateDisplay, 2, },
-        {settingsColors[3], saveSettings, displayColors[3], updateDisplay, 3, },
-        {settingsColors[4], saveSettings, displayColors[4], updateDisplay, 4, },
-        {settingsColors[5], saveSettings, displayColors[5], updateDisplay, 5, },
-        {settingsColors[6], saveSettings, displayColors[6], updateDisplay, 6, },
-        {settingsColors[7], saveSettings, displayColors[7], updateDisplay, 7, },
-        };
-
-    Helpers::Statemachine<DollHouse::DataType> statemachines[DollHouse::numberOfButtons] = {
-        Helpers::Statemachine(DollHouse::stateOff),
-        Helpers::Statemachine(DollHouse::stateOff),
-        Helpers::Statemachine(DollHouse::stateOff),
-        Helpers::Statemachine(DollHouse::stateOff),
-        Helpers::Statemachine(DollHouse::stateOff),
-        Helpers::Statemachine(DollHouse::stateOff),
-        Helpers::Statemachine(DollHouse::stateOff),
-        Helpers::Statemachine(DollHouse::stateOff),
-    };
+    // Show power-up on Status LED.
+    DollHouse::displayColors[0] = Colors::ColorCustomFixed(65536/7*4+500, 12);
 
     // loop
     while (true)
@@ -183,14 +179,17 @@ void setup()
         // Actually copy the latched shift-register values to data.
         buttonsInShiftRegister::shiftOutBits(DollHouse::buttonsMemory);
 
-        Helpers::TMP::Loop<DollHouse::numberOfButtons, DollHouse::WrapperUpdate>::impl();
+        for (DollHouse::CustomButtomTimedMultiple & button : DollHouse::buttonsTimedMultiple)
+        {
+            button.update();
+        }
 
         // Helpers::TMP::Loop<DollHouse::numberOfButtons, WrapperLogButton>::impl();
         // Serial.println(".");
 
         for (size_t index = 0; index < DollHouse::numberOfButtons; ++index)
         {
-            statemachines[index].process(dataTypes[index]);
+            DollHouse::statemachines[index].process(DollHouse::dataTypes[index]);
             // // For the following to work, you will have to remove the "private:" status
             // // of currentState_ in Statemachine. Only do so temporarily!
             // if (&DollHouse::stateBrightness == statemachines[index].currentState_)
@@ -212,42 +211,36 @@ void setup()
         }
         // Serial.println("");
 
-        if (updateDisplay)
+        if (DollHouse::updateDisplay)
         {
-            // convert Colors::ColorCustom to RGB
+            // convert Colors::ColorCustomFixed to RGB
             for (size_t index = 0; index < ledsStrip.numPixels(); ++index)
             {
-                Colors::ColorRgbw const colorRgb = Colors::SevenSegmentRgb::toRgb(displayColors[index]);
-                ledsStrip.setPixelColor(index, Adafruit_NeoPixel::Color(colorRgb.red, colorRgb.green, colorRgb.blue));
+                Colors::ColorRgbw const colorRgb = Colors::SevenSegmentRgb::toRgb(DollHouse::displayColors[index]);
+                ledsStrip.setPixelColor(index, colorRgb.red, colorRgb.green, colorRgb.blue);
             }
             // show NEO-pixels
             ledsStrip.show();
-            updateDisplay = false;
+            DollHouse::updateDisplay = false;
         }
 
-        if (saveSettings)
+        if (DollHouse::saveSettings)
         {
             // // Save to Eeprom.
-            static_assert(E2END >= (Eeprom::Addresses::backupValues + sizeof(settingsColors) + 2 /* CRC */ - 1 /* index */));
-            Eeprom::writeWithCrc(settingsColors, sizeof(settingsColors), Eeprom::Addresses::backupValues);
-            saveSettings = false;
+            static_assert(E2END >= (Eeprom::Addresses::backupValues + sizeof(DollHouse::settingsColors) + 2 /* CRC */ - 1 /* index */));
+            Eeprom::writeWithCrc(DollHouse::settingsColors, sizeof(DollHouse::settingsColors), Eeprom::Addresses::backupValues);
+            DollHouse::saveSettings = false;
         }
 
         delay(50); // idle for 50ms
     }
+
+    // Notify error - one should never leave the while-loop above.
+    ledsStrip.setPixelColor(0, /*red*/ 255, /*green*/ 0, /*blue*/ 0);
+    ledsStrip.show();
 }
 
 void loop()
 {
-    // Notify error
-    // initialize digital pin LED_BUILTIN as an output.
-    pinMode(LED_BUILTIN, OUTPUT);
-  
-    while (true)
-    {
-        digitalWrite(LED_BUILTIN, HIGH);  // turn the LED on (HIGH is the voltage level)
-        delay(1000);                      // wait for a second
-        digitalWrite(LED_BUILTIN, LOW);   // turn the LED off by making the voltage LOW
-        delay(1000);                      // wait for a second
-    }
+    // intentionally empty
 }

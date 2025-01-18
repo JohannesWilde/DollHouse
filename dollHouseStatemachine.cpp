@@ -11,16 +11,46 @@ StateOn const stateOn;
 StateBrightness const stateBrightness;
 StateHue const stateHue;
 
+
+Colors::ColorCustomFixed settingsColors[ledsCount] = {};
+bool saveSettings = false;
+Colors::ColorCustomFixed displayColors[ledsCount] = {};
+bool updateDisplay = false;
+
+DataType dataTypes[numberOfButtons] = {};
+
+constexpr size_t getLedIndex(DataType const * const data)
+{
+    return 1 + (data - dataTypes);
+}
+
+constexpr size_t getButtonIndex(DataType const * const data)
+{
+    return (data - dataTypes);
+}
+
+Helpers::Statemachine<DataType> statemachines[numberOfButtons] = {
+    Helpers::Statemachine(stateOff),
+    Helpers::Statemachine(stateOff),
+    Helpers::Statemachine(stateOff),
+    Helpers::Statemachine(stateOff),
+    Helpers::Statemachine(stateOff),
+    Helpers::Statemachine(stateOff),
+    Helpers::Statemachine(stateOff),
+    Helpers::Statemachine(stateOff),
+};
+
+
 void StateOff::init(DataType & data) const
 {
-    data.displayColor = Colors::ColorCustom(0., 0.);
-    data.updateDisplay = true;
+    displayColors[getLedIndex(&data)] = Colors::ColorCustomFixed(0, 0);
+    updateDisplay = true;
 }
 
 Helpers::AbstractState<DataType> const & StateOff::process(DataType & data) const
 {
     Helpers::AbstractState<DataType> const * nextState = this;
-    if (DollHouse::buttonIsSingleDownShortFinished(data.buttonIndex))
+    if (buttonsTimedMultiple[getButtonIndex(&data)].isSingleDownShortFinished())
     {
         nextState = &stateOn;
     }
@@ -39,22 +69,22 @@ void StateOff::deinit(DataType & data) const
 
 void StateOn::init(DataType & data) const
 {
-    data.displayColor = data.settingsColor;
-    data.updateDisplay = true;
+    displayColors[getLedIndex(&data)] = settingsColors[getLedIndex(&data)];
+    updateDisplay = true;
 }
 
 Helpers::AbstractState<DataType> const & StateOn::process(DataType & data) const
 {
     Helpers::AbstractState<DataType> const * nextState = this;
-    if (DollHouse::buttonIsSingleDownShortFinished(data.buttonIndex))
+    if (buttonsTimedMultiple[getButtonIndex(&data)].isSingleDownShortFinished())
     {
         nextState = &stateOff;
     }
-    else if (DollHouse::buttonIsDownLong(data.buttonIndex))
+    else if (buttonsTimedMultiple[getButtonIndex(&data)].isDownLong())
     {
         nextState = &stateBrightness;
     }
-    else if (DollHouse::buttonIsDoubleDownShortFinished(data.buttonIndex))
+    else if (buttonsTimedMultiple[getButtonIndex(&data)].isDoubleDownShortFinished())
     {
         nextState = &stateHue;
     }
@@ -80,37 +110,32 @@ void StateBrightness::init(DataType & data) const
 Helpers::AbstractState<DataType> const & StateBrightness::process(DataType & data) const
 {
     Helpers::AbstractState<DataType> const * nextState = this;
-    if (DollHouse::buttonIsDownLong(data.buttonIndex))
+    if (buttonsTimedMultiple[getButtonIndex(&data)].isDownLong())
     {
         // As long as button stays down, modify brightness.
-        static constexpr float brightnessStepSingle = 1./256.;
-        static constexpr float brightnessStep = 2. * brightnessStepSingle;
-        static constexpr float brightnessMin = 2. * brightnessStepSingle;
+        static constexpr uint8_t brightnessStepSingle = 1;
+        static constexpr uint8_t brightnessStep = 2 * brightnessStepSingle;
+        static constexpr uint8_t brightnessMin = 2 * brightnessStepSingle;
         if (data.incrementBrightness)
         {
-            float const newBrightness = data.displayColor.brightness + brightnessStep;
-            if (1. < newBrightness)
+            if ((255 - brightnessStep) >= displayColors[getLedIndex(&data)].brightness)
             {
-                data.displayColor.brightness = 1.;
-            }
-            else
-            {
-                data.displayColor.brightness = newBrightness;
+                displayColors[getLedIndex(&data)].brightness += brightnessStep;
             }
         }
         else
         {
-            float const newBrightness = data.displayColor.brightness - brightnessStep;
-            if (brightnessMin > newBrightness)
+            if (brightnessStep <= displayColors[getLedIndex(&data)].brightness)
             {
-                data.displayColor.brightness = brightnessMin; // Prevent on and off state being indistinguishable.
+                displayColors[getLedIndex(&data)].brightness -= brightnessStep;
             }
-            else
+            // Prevent on and off state being indistinguishable.
+            if (brightnessMin > displayColors[getLedIndex(&data)].brightness)
             {
-                data.displayColor.brightness = newBrightness;
+                displayColors[getLedIndex(&data)].brightness = brightnessMin;
             }
         }
-        data.updateDisplay = true;
+        updateDisplay = true;
     }
     else
     {
@@ -122,8 +147,8 @@ Helpers::AbstractState<DataType> const & StateBrightness::process(DataType & dat
 
 void StateBrightness::deinit(DataType & data) const
 {
-    data.settingsColor = data.displayColor;
-    data.saveSettings = true;
+    settingsColors[getLedIndex(&data)].brightness = displayColors[getLedIndex(&data)].brightness;
+    saveSettings = true;
 }
 
 
@@ -135,30 +160,25 @@ void StateHue::init(DataType & data) const
 Helpers::AbstractState<DataType> const & StateHue::process(DataType & data) const
 {
     Helpers::AbstractState<DataType> const * nextState = this;
-    if (DollHouse::buttonIsSingleDownShortFinished(data.buttonIndex))
+    if (buttonsTimedMultiple[getButtonIndex(&data)].isSingleDownShortFinished())
     {
         // Change to next major hue.
-        data.displayColor.hue = Colors::SevenSegmentRgb::nextMajorHue(data.displayColor.hue);
+        displayColors[getLedIndex(&data)].hue = Colors::SevenSegmentRgb::nextMajorHue(displayColors[getLedIndex(&data)].hue);
 
-        data.updateDisplay = true;
+        updateDisplay = true;
         // Reset timeout while the user still interacts with this state.
         data.stateTimeout = DollHouse::durationStateTimeout;
     }
-    else if (DollHouse::buttonIsDownLong(data.buttonIndex))
+    else if (buttonsTimedMultiple[getButtonIndex(&data)].isDownLong())
     {
         // Change hue continuously.
-        float nextHue = data.displayColor.hue + 5.f * Colors::SevenSegmentRgb::singleDeltaHue();
-        if (1. <= nextHue)
-        {
-            nextHue -= 1.;
-        }
-        data.displayColor.hue = nextHue;
+        displayColors[getLedIndex(&data)].hue += 5 * Colors::SevenSegmentRgb::singleDeltaHueUint16();
 
-        data.updateDisplay = true;
+        updateDisplay = true;
         // Reset timeout while the user still interacts with this state.
         data.stateTimeout = DollHouse::durationStateTimeout;
     }
-    else if ((0 == data.stateTimeout) || DollHouse::buttonIsDoubleDownShortFinished(data.buttonIndex))
+    else if ((0 == data.stateTimeout) || buttonsTimedMultiple[getButtonIndex(&data)].isDoubleDownShortFinished())
     {
         nextState = &stateOn;
     }
@@ -171,8 +191,8 @@ Helpers::AbstractState<DataType> const & StateHue::process(DataType & data) cons
 
 void StateHue::deinit(DataType & data) const
 {
-    data.settingsColor = data.displayColor;
-    data.saveSettings = true;
+    settingsColors[getLedIndex(&data)] = displayColors[getLedIndex(&data)];
+    saveSettings = true;
 }
 
 

@@ -25,3 +25,11 @@ add_executable(testColorsCustom
 target_link_libraries(testColorsCustom
     PRIVATE customColors
 )
+
+
+add_executable(testImplicitIndexing
+    testImplicitIndexing.cpp
+)
+
+# target_link_libraries(testImplicitIndexing
+# )

@@ -2,6 +2,7 @@
 #define DOLL_HOUSE_BUTTONS_HPP
 
 #include "ArduinoDrivers/button.hpp"
+#include "ArduinoDrivers/buttonDynamic.hpp"
 #include "ArduinoDrivers/buttonTimedMultiple.hpp"
 #include "ArduinoDrivers/simplePinBit.hpp"
 
@@ -38,62 +39,16 @@ typedef Button<Pin5, downState> Button5;
 typedef Button<Pin6, downState> Button6;
 typedef Button<Pin7, downState> Button7;
 
-typedef ButtonTimedMultiple<Button0, durationShort, durationLong, durationCombineMax> ButtonTimedMultiple0;
-typedef ButtonTimedMultiple<Button1, durationShort, durationLong, durationCombineMax> ButtonTimedMultiple1;
-typedef ButtonTimedMultiple<Button2, durationShort, durationLong, durationCombineMax> ButtonTimedMultiple2;
-typedef ButtonTimedMultiple<Button3, durationShort, durationLong, durationCombineMax> ButtonTimedMultiple3;
-typedef ButtonTimedMultiple<Button4, durationShort, durationLong, durationCombineMax> ButtonTimedMultiple4;
-typedef ButtonTimedMultiple<Button5, durationShort, durationLong, durationCombineMax> ButtonTimedMultiple5;
-typedef ButtonTimedMultiple<Button6, durationShort, durationLong, durationCombineMax> ButtonTimedMultiple6;
-typedef ButtonTimedMultiple<Button7, durationShort, durationLong, durationCombineMax> ButtonTimedMultiple7;
 
-template <uint8_t index>
-class Buttons;
-template <> class Buttons<0> : public ButtonTimedMultiple0 {/* intentionally empty */};
-template <> class Buttons<1> : public ButtonTimedMultiple1 {/* intentionally empty */};
-template <> class Buttons<2> : public ButtonTimedMultiple2 {/* intentionally empty */};
-template <> class Buttons<3> : public ButtonTimedMultiple3 {/* intentionally empty */};
-template <> class Buttons<4> : public ButtonTimedMultiple4 {/* intentionally empty */};
-template <> class Buttons<5> : public ButtonTimedMultiple5 {/* intentionally empty */};
-template <> class Buttons<6> : public ButtonTimedMultiple6 {/* intentionally empty */};
-template <> class Buttons<7> : public ButtonTimedMultiple7 {/* intentionally empty */};
+void buttonInitialize(void const * const instance);
+void buttonDeinitialize(void const * const instance);
+bool buttonIsDown(void const * const instance);
 
 
-// Wrappers for TMP loops.
-template<uint8_t Index>
-struct WrapperInitialize
-{
-    static void impl()
-    {
-        DollHouse::Buttons<Index>::initialize();
-    }
-};
+typedef ButtonDynamic<&buttonInitialize, &buttonIsDown, &buttonDeinitialize> CustomButton;
+typedef ButtonTimedMultiple<CustomButton, durationShort, durationLong, durationCombineMax, 5> CustomButtomTimedMultiple;
 
-template<uint8_t Index>
-struct WrapperUpdate
-{
-    static void impl()
-    {
-        DollHouse::Buttons<Index>::update();
-    }
-};
-
-template<uint8_t Index>
-struct WrapperDeinitialize
-{
-    static void impl()
-    {
-        DollHouse::Buttons<Index>::deinitialize();
-    }
-};
-
-// Wrappers for run-time loops.
-
-bool buttonIsDoubleDownShortFinished(size_t const index);
-
-bool buttonIsSingleDownShortFinished(size_t const index);
-
-bool buttonIsDownLong(size_t const index);
+extern CustomButtomTimedMultiple buttonsTimedMultiple[numberOfButtons];
 
 } // namespace DollHouse
 
