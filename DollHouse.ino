@@ -1,5 +1,6 @@
 #include "dollHouseButtons.hpp"
 #include "dollHouseStatemachine.hpp"
+#include "slowPulseGenerator.hpp"
 
 #if defined(_AVR_IOTNX4_H_)
 #include "ArduinoDrivers/attinyX4.hpp"
@@ -86,6 +87,16 @@ uint16_t constexpr ledsCount = 9;
 static Adafruit_NeoPixel ledsStrip(ledsCount, pinLedsStrip, NEO_GRBW + NEO_KHZ800);
 
 
+typedef SlowPulseGenerator<
+#if defined(_AVR_IOTNX4_H_)
+    ATtinyX4::pin,
+#elif defined(_AVR_IOM328P_H_)
+    ArduinoUno::D7
+#else
+    // Not supported yet.
+#endif
+    > powerbankKeepAlive;
+
 // template<uint8_t Index>
 // struct WrapperLogButton
 // {
@@ -152,6 +163,8 @@ void setup()
 
     // Serial.begin(9600);
     // Serial.println("Doll house v0.9");
+
+    powerbankKeepAlive::initialize();
 
     buttonsInShiftRegister::initialize();
     buttonsInShiftRegister::enableClock();
@@ -232,8 +245,21 @@ void setup()
             DollHouse::saveSettings = false;
         }
 
-        delay(50); // idle for 50ms
+        bool const pulsed = powerbankKeepAlive::update();
+        if (pulsed)
+        {
+            static_assert(50 >= powerbankKeepAlive::millisecondsToSleep);
+            delay(50 - powerbankKeepAlive::millisecondsToSleep); // idle for remainder of 50ms
+        }
+        else
+        {
+            delay(50); // idle for 50ms
+        }
+
+        // Serial.println(".");
     }
+
+    powerbankKeepAlive::deinitialize();
 
     // Notify error - one should never leave the while-loop above.
     ledsStrip.setPixelColor(0, /*red*/ 255, /*green*/ 0, /*blue*/ 0);
